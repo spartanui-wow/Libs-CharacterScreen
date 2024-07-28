@@ -227,98 +227,45 @@ local function CheckAddionalAddons()
 	end
 end
 
-local function CreateGearButton(parent, slotName)
+local function CreateGearButton(parent, slotName, size)
 	local button = CreateFrame('Button', nil, parent)
-	button:SetSize(26, 26)
+	button:SetSize(size, size)
 
-	-- Secondary Button
-	button.SecondaryButton = CreateFrame('Button', nil, button)
-	button.SecondaryButton:SetSize(14, 14)
-	button.SecondaryButton:SetPoint('CENTER', button, 'CENTER', 10.6, 10.6)
-	button.SecondaryButton:Hide()
+	local slotID, textureName = GetInventorySlotInfo(slotName)
+	button.slotID = slotID
+	button.emptyTexture = textureName
 
-	button.SecondaryButton.GreenTick = button.SecondaryButton:CreateTexture(nil, 'OVERLAY', nil, 2)
-	button.SecondaryButton.GreenTick:SetTexture('Interface\\AddOns\\Libs-CharacterScreen\\media\\GreenTick')
-	button.SecondaryButton.GreenTick:SetSize(12, 12)
-	button.SecondaryButton.GreenTick:SetPoint('CENTER', button.SecondaryButton, 'BOTTOM', 0, 1)
+	local iconSize = size * 0.85 -- 85% of button size
+	local borderSize = size * 2.62 -- 262% of button size (maintains proportion)
+	local highlightSize = size * 1.31 -- 131% of button size
 
 	-- Main Icon
-	button.ItemIcon = button:CreateTexture(nil, 'BACKGROUND')
-	button.ItemIcon:SetSize(22, 22)
+	button.ItemIcon = button:CreateTexture(nil, 'ARTWORK')
+	button.ItemIcon:SetSize(iconSize, iconSize)
 	button.ItemIcon:SetPoint('CENTER')
+	button.ItemIcon:SetTexture(textureName)
 	button.ItemIcon:SetTexCoord(0.075, 0.925, 0.075, 0.925)
 
 	-- Icon Mask
 	button.IconMask = button:CreateMaskTexture()
-	button.IconMask:SetTexture('Interface\\AddOns\\Libs-CharacterScreen\\media\\masks\\Circle')
+	button.IconMask:SetTexture('Interface\\AddOns\\Libs-CharacterScreen\\media\\masks\\Circle', 'CLAMPTOBLACKADDITIVE', 'CLAMPTOBLACKADDITIVE')
 	button.IconMask:SetAllPoints(button.ItemIcon)
 	button.ItemIcon:AddMaskTexture(button.IconMask)
 
-	-- Secondary Icon
-	button.SecondaryItemIcon = button:CreateTexture(nil, 'BACKGROUND', nil, 1)
-	button.SecondaryItemIcon:SetSize(12, 12)
-	button.SecondaryItemIcon:SetPoint('CENTER', button.SecondaryButton, 'CENTER')
-	button.SecondaryItemIcon:SetTexCoord(0.075, 0.925, 0.075, 0.925)
-
-	-- Secondary Icon Mask
-	button.SecondaryItemIconMask = button:CreateMaskTexture()
-	button.SecondaryItemIconMask:SetTexture('Interface\\AddOns\\Libs-CharacterScreen\\media\\masks\\Circle')
-	button.SecondaryItemIconMask:SetAllPoints(button.SecondaryItemIcon)
-	button.SecondaryItemIcon:AddMaskTexture(button.SecondaryItemIconMask)
-
-	-- Inner Highlight
-	button.InnerHighlight = button:CreateTexture(nil, 'ARTWORK')
-	button.InnerHighlight:SetTexture('Interface\\AddOns\\Libs-CharacterScreen\\media\\ItemBorderInnerHighlight')
-	button.InnerHighlight:SetSize(34, 34)
-	button.InnerHighlight:SetPoint('CENTER')
-	button.InnerHighlight:SetBlendMode('ADD')
-	button.InnerHighlight:SetAlpha(0)
-	button.InnerHighlight:Hide()
-
 	-- Border
-	button.Border = button:CreateTexture(nil, 'OVERLAY')
+	button.Border = button:CreateTexture(nil, 'BORDER')
 	button.Border:SetTexture('Interface\\AddOns\\Libs-CharacterScreen\\media\\ItemBorder')
-	button.Border:SetSize(68, 68)
+	button.Border:SetSize(borderSize, borderSize)
 	button.Border:SetPoint('CENTER')
 	button.Border:SetTexCoord(0, 0.5, 0, 1)
 
-	-- Border Shine
-	button.BorderShine = button:CreateTexture(nil, 'OVERLAY', nil, 2)
-	button.BorderShine:SetTexture('Interface\\AddOns\\Libs-CharacterScreen\\media\\ItemBorderOuterHighlight')
-	button.BorderShine:SetSize(68, 68)
-	button.BorderShine:SetPoint('CENTER')
-	button.BorderShine:SetBlendMode('ADD')
-	button.BorderShine:Hide()
-
-	-- Shine Animation
-	button.BorderShine.Shine = button.BorderShine:CreateAnimationGroup()
-	local fadeIn = button.BorderShine.Shine:CreateAnimation('Alpha')
-	fadeIn:SetOrder(1)
-	fadeIn:SetDuration(0.12)
-	fadeIn:SetFromAlpha(0)
-	fadeIn:SetToAlpha(1)
-	fadeIn:SetSmoothing('OUT')
-
-	local fadeOut = button.BorderShine.Shine:CreateAnimation('Alpha')
-	fadeOut:SetOrder(2)
-	fadeOut:SetStartDelay(0.25)
-	fadeOut:SetDuration(0.5)
-	fadeOut:SetFromAlpha(1)
-	fadeOut:SetToAlpha(0)
-	fadeOut:SetSmoothing('OUT')
-
-	button.BorderShine.Shine:SetScript(
-		'OnFinished',
-		function(self)
-			self:GetParent():Hide()
-		end
-	)
-	button.BorderShine.Shine:SetScript(
-		'OnStop',
-		function(self)
-			self:GetParent():Hide()
-		end
-	)
+	-- Inner Highlight
+	button.InnerHighlight = button:CreateTexture(nil, 'OVERLAY')
+	button.InnerHighlight:SetTexture('Interface\\AddOns\\Libs-CharacterScreen\\media\\ItemBorderInnerHighlight')
+	button.InnerHighlight:SetSize(highlightSize, highlightSize)
+	button.InnerHighlight:SetPoint('CENTER')
+	button.InnerHighlight:SetBlendMode('ADD')
+	button.InnerHighlight:SetAlpha(0)
 
 	-- Scripts
 	button:SetScript(
@@ -335,10 +282,7 @@ local function CreateGearButton(parent, slotName)
 			else
 				GameTooltip:Hide()
 			end
-
-			-- if self:HasItem() then
-			-- FadeFrame(self.InnerHighlight, 0.12, 1)
-			-- end
+			self.InnerHighlight:SetAlpha(1)
 		end
 	)
 
@@ -346,9 +290,7 @@ local function CreateGearButton(parent, slotName)
 		'OnLeave',
 		function(self)
 			GameTooltip:Hide()
-			-- if self:HasItem() then
-			-- FadeFrame(self.InnerHighlight, 0.2, 0)
-			-- end
+			self.InnerHighlight:SetAlpha(0)
 		end
 	)
 
@@ -367,6 +309,61 @@ local function CreateGearButton(parent, slotName)
 	)
 
 	return button
+end
+
+local function CreateSlotButton(frame, buttonSize)
+	local container = CreateFrame('Frame', nil, frame)
+	container:SetPoint('BOTTOMLEFT', frame, 'BOTTOMLEFT', 0, 0)
+	frame.SlotFrame = container
+
+	local slotArrangement = {
+		[1] = {'HEADSLOT', 'SHOULDERSLOT', 'BACKSLOT', 'CHESTSLOT', 'WRISTSLOT'},
+		[2] = {'HANDSSLOT', 'WAISTSLOT', 'LEGSSLOT', 'FEETSLOT'},
+		[3] = {'MAINHANDSLOT', 'SECONDARYHANDSLOT'},
+		[4] = {'SHIRTSLOT', 'TABARDSLOT'}
+	}
+
+	local buttons = {}
+	local buttonWidth = buttonSize
+	local offsetY = buttonSize * 0.46 -- 46% of button size
+	local buttonGap = buttonSize * 0.15 -- 15% of button size
+	local extrudeX = buttonSize * 0.62 -- 62% of button size
+	local fullWidth = extrudeX
+
+	for sectorIndex = 1, #slotArrangement do
+		if sectorIndex ~= 1 then
+			fullWidth = fullWidth + buttonSize * 0.46 -- 46% of button size
+		end
+		for i = 1, #slotArrangement[sectorIndex] do
+			local slotName = slotArrangement[sectorIndex][i]
+			local button = CreateGearButton(container, slotName, buttonSize)
+			button:SetPoint('BOTTOMLEFT', container, 'BOTTOMLEFT', fullWidth, offsetY)
+
+			buttons[button.slotID] = button
+			fullWidth = fullWidth + buttonWidth + buttonGap
+		end
+	end
+
+	container:SetWidth(fullWidth + extrudeX)
+	container:SetHeight(buttonSize * 3.85) -- Adjust as needed
+
+	frame.DressingRoomItemButtons = buttons
+
+	-- Function to update button icons with equipped items
+	frame.UpdateEquippedItems = function()
+		for slotID, button in pairs(buttons) do
+			local itemID = GetInventoryItemID('player', slotID)
+			if itemID then
+				local itemTexture = C_Item.GetItemIconByID(itemID)
+				button.ItemIcon:SetTexture(itemTexture)
+			else
+				button.ItemIcon:SetTexture(button.emptyTexture)
+			end
+		end
+	end
+
+	-- Initial update of equipped items
+	frame:UpdateEquippedItems()
 end
 
 local function CreatePortrait(frame)
@@ -409,103 +406,6 @@ local function CreatePortrait(frame)
 	frame.portrait = portrait
 
 	return portrait
-end
-
-local function CreateSlotButton(frame)
-	local container = CreateFrame('Frame', nil, frame)
-	container:SetPoint('BOTTOMLEFT', frame, 'BOTTOMLEFT', 0, 0)
-	frame.SlotFrame = container
-
-	local slotArrangement = {
-		[1] = {'HEADSLOT', 'SHOULDERSLOT', 'BACKSLOT', 'CHESTSLOT', 'WRISTSLOT'},
-		[2] = {'HANDSSLOT', 'WAISTSLOT', 'LEGSSLOT', 'FEETSLOT'},
-		[3] = {'MAINHANDSLOT', 'SECONDARYHANDSLOT'},
-		[4] = {'SHIRTSLOT', 'TABARDSLOT'}
-	}
-
-	local buttons = {}
-	local buttonWidth = 24 -- Adjust as needed
-	local buttonHeight = 24 -- Adjust as needed
-	local offsetY = 12
-	local buttonGap = 4
-	local extrudeX = 16
-	local fullWidth = extrudeX
-
-	for sectorIndex = 1, #slotArrangement do
-		if sectorIndex ~= 1 then
-			fullWidth = fullWidth + 12
-		end
-		for i = 1, #slotArrangement[sectorIndex] do
-			local button = CreateFrame('Button', nil, container)
-			button:SetSize(buttonWidth, buttonHeight)
-
-			local slotName = slotArrangement[sectorIndex][i]
-			local slotID, textureName = GetInventorySlotInfo(slotName)
-			button.slotID = slotID
-			button.emptyTexture = textureName
-
-			-- Create and set up button textures
-			button.Icon = button:CreateTexture(nil, 'ARTWORK')
-			button.Icon:SetAllPoints()
-			button.Icon:SetTexture(textureName)
-
-			button.Border = button:CreateTexture(nil, 'OVERLAY')
-			button.Border:SetAllPoints()
-			button.Border:SetTexture('Interface\\Buttons\\UI-ActionButton-Border')
-			button.Border:SetBlendMode('ADD')
-			button.Border:Hide()
-
-			button:SetPoint('BOTTOMLEFT', container, 'BOTTOMLEFT', fullWidth, offsetY)
-
-			-- Set up button scripts
-			button:SetScript(
-				'OnEnter',
-				function(self)
-					self.Border:Show()
-					-- Add tooltip logic here
-				end
-			)
-
-			button:SetScript(
-				'OnLeave',
-				function(self)
-					self.Border:Hide()
-					GameTooltip:Hide()
-				end
-			)
-
-			button:SetScript(
-				'OnClick',
-				function(self)
-					-- Add click behavior here
-				end
-			)
-
-			buttons[slotID] = button
-			fullWidth = fullWidth + buttonWidth + buttonGap
-		end
-	end
-
-	container:SetWidth(fullWidth + extrudeX)
-	container:SetHeight(100) -- Adjust as needed
-
-	frame.DressingRoomItemButtons = buttons
-
-	-- Function to update button icons with equipped items
-	frame.UpdateEquippedItems = function()
-		for slotID, button in pairs(buttons) do
-			local itemID = GetInventoryItemID('player', slotID)
-			if itemID then
-				local itemTexture = C_Item.GetItemIconByID(itemID)
-				button.Icon:SetTexture(itemTexture)
-			else
-				button.Icon:SetTexture(button.emptyTexture)
-			end
-		end
-	end
-
-	-- Initial update of equipped items
-	frame:UpdateEquippedItems()
 end
 
 function LibCS:CreateNewCharacterFrame()
@@ -557,7 +457,7 @@ function LibCS:CreateNewCharacterFrame()
 	frame.portrait = CreatePortrait(frame)
 
 	-- Create gear buttons
-	CreateSlotButton(frame)
+	CreateSlotButton(frame, 40)
 
 	-- frame.GearButtons = {}
 	-- local slotArrangement = {
