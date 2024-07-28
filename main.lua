@@ -44,7 +44,7 @@ local function Strip()
 
 	CharacterFrame.TopTileStreaks:Hide()
 	TokenFramePopup:SetFrameStrata('HIGH')
-	ReputationDetailFrame:SetFrameStrata('HIGH')
+	ReputationFrame:SetFrameStrata('HIGH')
 
 	local charbg = _G['CharacterFrameBgbg'] or CreateFrame('Frame', 'CharacterFrameBgbg', CharacterFrame)
 	local charbgtex = _G['CharacterFrameBgbgtex'] or charbg:CreateTexture('CharacterFrameBgbgtex', 'BACKGROUND', nil, 1)
@@ -227,6 +227,456 @@ local function CheckAddionalAddons()
 	end
 end
 
+local function CreateGearButton(parent, slotName)
+	local button = CreateFrame('Button', nil, parent)
+	button:SetSize(26, 26)
+
+	-- Secondary Button
+	button.SecondaryButton = CreateFrame('Button', nil, button)
+	button.SecondaryButton:SetSize(14, 14)
+	button.SecondaryButton:SetPoint('CENTER', button, 'CENTER', 10.6, 10.6)
+	button.SecondaryButton:Hide()
+
+	button.SecondaryButton.GreenTick = button.SecondaryButton:CreateTexture(nil, 'OVERLAY', nil, 2)
+	button.SecondaryButton.GreenTick:SetTexture('Interface\\AddOns\\Libs-CharacterScreen\\media\\GreenTick')
+	button.SecondaryButton.GreenTick:SetSize(12, 12)
+	button.SecondaryButton.GreenTick:SetPoint('CENTER', button.SecondaryButton, 'BOTTOM', 0, 1)
+
+	-- Main Icon
+	button.ItemIcon = button:CreateTexture(nil, 'BACKGROUND')
+	button.ItemIcon:SetSize(22, 22)
+	button.ItemIcon:SetPoint('CENTER')
+	button.ItemIcon:SetTexCoord(0.075, 0.925, 0.075, 0.925)
+
+	-- Icon Mask
+	button.IconMask = button:CreateMaskTexture()
+	button.IconMask:SetTexture('Interface\\AddOns\\Libs-CharacterScreen\\media\\masks\\Circle')
+	button.IconMask:SetAllPoints(button.ItemIcon)
+	button.ItemIcon:AddMaskTexture(button.IconMask)
+
+	-- Secondary Icon
+	button.SecondaryItemIcon = button:CreateTexture(nil, 'BACKGROUND', nil, 1)
+	button.SecondaryItemIcon:SetSize(12, 12)
+	button.SecondaryItemIcon:SetPoint('CENTER', button.SecondaryButton, 'CENTER')
+	button.SecondaryItemIcon:SetTexCoord(0.075, 0.925, 0.075, 0.925)
+
+	-- Secondary Icon Mask
+	button.SecondaryItemIconMask = button:CreateMaskTexture()
+	button.SecondaryItemIconMask:SetTexture('Interface\\AddOns\\Libs-CharacterScreen\\media\\masks\\Circle')
+	button.SecondaryItemIconMask:SetAllPoints(button.SecondaryItemIcon)
+	button.SecondaryItemIcon:AddMaskTexture(button.SecondaryItemIconMask)
+
+	-- Inner Highlight
+	button.InnerHighlight = button:CreateTexture(nil, 'ARTWORK')
+	button.InnerHighlight:SetTexture('Interface\\AddOns\\Libs-CharacterScreen\\media\\ItemBorderInnerHighlight')
+	button.InnerHighlight:SetSize(34, 34)
+	button.InnerHighlight:SetPoint('CENTER')
+	button.InnerHighlight:SetBlendMode('ADD')
+	button.InnerHighlight:SetAlpha(0)
+	button.InnerHighlight:Hide()
+
+	-- Border
+	button.Border = button:CreateTexture(nil, 'OVERLAY')
+	button.Border:SetTexture('Interface\\AddOns\\Libs-CharacterScreen\\media\\ItemBorder')
+	button.Border:SetSize(68, 68)
+	button.Border:SetPoint('CENTER')
+	button.Border:SetTexCoord(0, 0.5, 0, 1)
+
+	-- Border Shine
+	button.BorderShine = button:CreateTexture(nil, 'OVERLAY', nil, 2)
+	button.BorderShine:SetTexture('Interface\\AddOns\\Libs-CharacterScreen\\media\\ItemBorderOuterHighlight')
+	button.BorderShine:SetSize(68, 68)
+	button.BorderShine:SetPoint('CENTER')
+	button.BorderShine:SetBlendMode('ADD')
+	button.BorderShine:Hide()
+
+	-- Shine Animation
+	button.BorderShine.Shine = button.BorderShine:CreateAnimationGroup()
+	local fadeIn = button.BorderShine.Shine:CreateAnimation('Alpha')
+	fadeIn:SetOrder(1)
+	fadeIn:SetDuration(0.12)
+	fadeIn:SetFromAlpha(0)
+	fadeIn:SetToAlpha(1)
+	fadeIn:SetSmoothing('OUT')
+
+	local fadeOut = button.BorderShine.Shine:CreateAnimation('Alpha')
+	fadeOut:SetOrder(2)
+	fadeOut:SetStartDelay(0.25)
+	fadeOut:SetDuration(0.5)
+	fadeOut:SetFromAlpha(1)
+	fadeOut:SetToAlpha(0)
+	fadeOut:SetSmoothing('OUT')
+
+	button.BorderShine.Shine:SetScript(
+		'OnFinished',
+		function(self)
+			self:GetParent():Hide()
+		end
+	)
+	button.BorderShine.Shine:SetScript(
+		'OnStop',
+		function(self)
+			self:GetParent():Hide()
+		end
+	)
+
+	-- Scripts
+	button:SetScript(
+		'OnEnter',
+		function(self)
+			GameTooltip:SetOwner(self, 'ANCHOR_NONE')
+			GameTooltip:SetPoint('BOTTOMLEFT', self, 'TOPLEFT', 2, 4)
+			if (self.hyperlink) then
+				GameTooltip:SetHyperlink(self.hyperlink)
+				GameTooltip:Show()
+			elseif self.localizedName then
+				GameTooltip:SetText(self.localizedName)
+				GameTooltip:Show()
+			else
+				GameTooltip:Hide()
+			end
+
+			-- if self:HasItem() then
+			-- FadeFrame(self.InnerHighlight, 0.12, 1)
+			-- end
+		end
+	)
+
+	button:SetScript(
+		'OnLeave',
+		function(self)
+			GameTooltip:Hide()
+			-- if self:HasItem() then
+			-- FadeFrame(self.InnerHighlight, 0.2, 0)
+			-- end
+		end
+	)
+
+	button:SetScript(
+		'OnClick',
+		function(self)
+			-- Implement OnClick functionality
+		end
+	)
+
+	button:SetScript(
+		'OnMouseDown',
+		function(self)
+			-- Implement OnMouseDown functionality
+		end
+	)
+
+	return button
+end
+
+local function CreatePortrait(frame)
+	-- Character portrait (center of the frame)
+	local portrait = CreateFrame('PlayerModel', nil, frame)
+	portrait:SetSize(231, frame:GetHeight() - 50)
+	portrait:SetPoint('CENTER', frame, 'CENTER', 0, 0)
+	portrait:SetUnit('player')
+	portrait.border = portrait:CreateTexture(nil, 'ARTWORK')
+	portrait.border:SetAllPoints(portrait)
+
+	-- Character name and level
+	local characterHeaderFrame = CreateFrame('Frame', nil, frame)
+	characterHeaderFrame:SetSize(200, 30)
+	characterHeaderFrame:SetPoint('TOP', portrait, 'TOP', 0, -10)
+	characterHeaderFrame.background = characterHeaderFrame:CreateTexture(nil, 'ARTWORK')
+	characterHeaderFrame.background:SetPoint('CENTER', characterHeaderFrame, 'CENTER', 0, 0)
+
+	characterHeaderFrame.Label = characterHeaderFrame:CreateFontString(nil, 'ARTWORK', 'GameFontNormalLarge')
+	characterHeaderFrame.Label:SetPoint('CENTER', characterHeaderFrame, 'CENTER', 0, 0)
+	characterHeaderFrame.Label:SetText(UnitLevel('player') .. ' ' .. UnitName('player'))
+	portrait.headerFrame = characterHeaderFrame
+
+	-- Character Spec label
+	local class = UnitClass('player')
+	local spec = GetSpecialization()
+	local specName = spec and (select(2, GetSpecializationInfo(spec)) .. ' ') or ''
+
+	local characterFooterFrame = CreateFrame('Frame', nil, frame)
+	characterFooterFrame:SetSize(200, 30)
+	characterFooterFrame:SetPoint('BOTTOM', portrait, 'BOTTOM', 0, 10)
+	characterFooterFrame.background = characterFooterFrame:CreateTexture(nil, 'ARTWORK')
+	characterFooterFrame.background:SetPoint('CENTER', characterFooterFrame, 'CENTER', 0, 0)
+
+	characterFooterFrame.Label = characterFooterFrame:CreateFontString(nil, 'ARTWORK', 'GameFontNormalLarge')
+	characterFooterFrame.Label:SetPoint('CENTER', characterFooterFrame, 'CENTER', 0, 0)
+	characterFooterFrame.Label:SetText(specName .. class)
+	portrait.footerFrame = characterFooterFrame
+
+	frame.portrait = portrait
+
+	return portrait
+end
+
+local function CreateSlotButton(frame)
+	local container = CreateFrame('Frame', nil, frame)
+	container:SetPoint('BOTTOMLEFT', frame, 'BOTTOMLEFT', 0, 0)
+	frame.SlotFrame = container
+
+	local slotArrangement = {
+		[1] = {'HEADSLOT', 'SHOULDERSLOT', 'BACKSLOT', 'CHESTSLOT', 'WRISTSLOT'},
+		[2] = {'HANDSSLOT', 'WAISTSLOT', 'LEGSSLOT', 'FEETSLOT'},
+		[3] = {'MAINHANDSLOT', 'SECONDARYHANDSLOT'},
+		[4] = {'SHIRTSLOT', 'TABARDSLOT'}
+	}
+
+	local buttons = {}
+	local buttonWidth = 24 -- Adjust as needed
+	local buttonHeight = 24 -- Adjust as needed
+	local offsetY = 12
+	local buttonGap = 4
+	local extrudeX = 16
+	local fullWidth = extrudeX
+
+	for sectorIndex = 1, #slotArrangement do
+		if sectorIndex ~= 1 then
+			fullWidth = fullWidth + 12
+		end
+		for i = 1, #slotArrangement[sectorIndex] do
+			local button = CreateFrame('Button', nil, container)
+			button:SetSize(buttonWidth, buttonHeight)
+
+			local slotName = slotArrangement[sectorIndex][i]
+			local slotID, textureName = GetInventorySlotInfo(slotName)
+			button.slotID = slotID
+			button.emptyTexture = textureName
+
+			-- Create and set up button textures
+			button.Icon = button:CreateTexture(nil, 'ARTWORK')
+			button.Icon:SetAllPoints()
+			button.Icon:SetTexture(textureName)
+
+			button.Border = button:CreateTexture(nil, 'OVERLAY')
+			button.Border:SetAllPoints()
+			button.Border:SetTexture('Interface\\Buttons\\UI-ActionButton-Border')
+			button.Border:SetBlendMode('ADD')
+			button.Border:Hide()
+
+			button:SetPoint('BOTTOMLEFT', container, 'BOTTOMLEFT', fullWidth, offsetY)
+
+			-- Set up button scripts
+			button:SetScript(
+				'OnEnter',
+				function(self)
+					self.Border:Show()
+					-- Add tooltip logic here
+				end
+			)
+
+			button:SetScript(
+				'OnLeave',
+				function(self)
+					self.Border:Hide()
+					GameTooltip:Hide()
+				end
+			)
+
+			button:SetScript(
+				'OnClick',
+				function(self)
+					-- Add click behavior here
+				end
+			)
+
+			buttons[slotID] = button
+			fullWidth = fullWidth + buttonWidth + buttonGap
+		end
+	end
+
+	container:SetWidth(fullWidth + extrudeX)
+	container:SetHeight(100) -- Adjust as needed
+
+	frame.DressingRoomItemButtons = buttons
+
+	-- Function to update button icons with equipped items
+	frame.UpdateEquippedItems = function()
+		for slotID, button in pairs(buttons) do
+			local itemID = GetInventoryItemID('player', slotID)
+			if itemID then
+				local itemTexture = C_Item.GetItemIconByID(itemID)
+				button.Icon:SetTexture(itemTexture)
+			else
+				button.Icon:SetTexture(button.emptyTexture)
+			end
+		end
+	end
+
+	-- Initial update of equipped items
+	frame:UpdateEquippedItems()
+end
+
+function LibCS:CreateNewCharacterFrame()
+	-- Main frame
+	local frame = CreateFrame('Frame', 'LibCSCharacterFrame', UIParent)
+	frame:SetSize(640, 480)
+	frame:SetPoint('CENTER')
+	frame:SetMovable(true)
+	frame:EnableMouse(true)
+	frame:RegisterForDrag('LeftButton')
+	frame:SetScript('OnDragStart', frame.StartMoving)
+	frame:SetScript('OnDragStop', frame.StopMovingOrSizing)
+
+	-- Background
+	frame.Background = frame:CreateTexture(nil, 'BACKGROUND')
+	frame.Background:SetTexture('Interface\\AddOns\\Libs-CharacterScreen\\media\\frame\\UIFrameTheWarWithinBackground')
+	frame.Background:SetAllPoints(frame)
+	frame.Background:Show()
+
+	-- Top Glow
+	frame.TopGlow = frame:CreateTexture(nil, 'ARTWORK')
+	frame.TopGlow:SetPoint('TOP')
+
+	-- Bottom Glow
+	frame.BottomGlow = frame:CreateTexture(nil, 'ARTWORK')
+	frame.BottomGlow:SetPoint('BOTTOM')
+
+	-- Border
+	frame.Border = frame:CreateTexture(nil, 'BORDER')
+	frame.Border:SetAllPoints()
+
+	-- NineSlice frame (for additional border elements)
+	frame.NineSlice = CreateFrame('Frame', nil, frame)
+	frame.NineSlice:SetAllPoints()
+
+	-- Top border decorations
+	frame.TopBorderDecoration = frame:CreateTexture(nil, 'OVERLAY')
+	frame.TopBorderDecoration:SetPoint('TOP', frame, 'TOP')
+
+	-- Bottom border decoration
+	frame.BottomBorderDecoration = frame:CreateTexture(nil, 'OVERLAY')
+	frame.BottomBorderDecoration:SetPoint('BOTTOM', frame, 'BOTTOM')
+
+	-- Close button
+	frame.CloseButton = CreateFrame('Button', nil, frame, 'UIPanelCloseButton')
+	frame.CloseButton:SetPoint('TOPRIGHT', frame, 'TOPRIGHT', -9, -9)
+
+	-- Portrait
+	frame.portrait = CreatePortrait(frame)
+
+	-- Create gear buttons
+	CreateSlotButton(frame)
+
+	-- frame.GearButtons = {}
+	-- local slotArrangement = {
+	-- 	[1] = {'HEADSLOT', 'SHOULDERSLOT', 'BACKSLOT', 'CHESTSLOT', 'WRISTSLOT'},
+	-- 	[2] = {'HANDSSLOT', 'WAISTSLOT', 'LEGSSLOT', 'FEETSLOT'},
+	-- 	[3] = {'MAINHANDSLOT', 'SECONDARYHANDSLOT'},
+	-- 	[4] = {'SHIRTSLOT', 'TABARDSLOT'}
+	-- }
+
+	-- local buttonWidth = 26
+	-- local buttonHeight = 26
+	-- local buttonGap = 4
+	-- local offsetX = 30
+	-- local offsetY = -60
+
+	-- for sectorIndex = 1, #slotArrangement do
+	-- 	for i = 1, #slotArrangement[sectorIndex] do
+	-- 		local slotName = slotArrangement[sectorIndex][i]
+	-- 		local slotID, textureName = GetInventorySlotInfo(slotName)
+	-- 		local button = CreateGearButton(frame, slotName)
+
+	-- 		button.slotID = slotID
+	-- 		button.ItemIcon:SetTexture(textureName)
+	-- 		button:SetPoint('TOPLEFT', frame, 'TOPLEFT', offsetX, offsetY)
+
+	-- 		frame.GearButtons[slotID] = button
+
+	-- 		offsetY = offsetY - (buttonHeight + buttonGap)
+	-- 	end
+	-- 	offsetX = offsetX + buttonWidth + buttonGap
+	-- 	offsetY = -60 -- Reset Y position for next column
+	-- end
+
+	-- Stats section (similar to RenownFrame's reward section)
+	-- local statsFrame = CreateFrame('Frame', nil, frame)
+	-- statsFrame:SetSize(200, 400)
+	-- statsFrame:SetPoint('TOPRIGHT', frame, 'TOPRIGHT', -20, -100)
+	-- frame.statsFrame = statsFrame
+
+	-- local function CreateStatDisplay(statName, yOffset)
+	-- 	local statFrame = CreateFrame('Frame', nil, statsFrame)
+	-- 	statFrame:SetSize(180, 30)
+	-- 	statFrame:SetPoint('TOP', statsFrame, 'TOP', 0, yOffset)
+
+	-- 	local statIcon = statFrame:CreateTexture(nil, 'ARTWORK')
+	-- 	statIcon:SetSize(30, 30)
+	-- 	statIcon:SetPoint('LEFT', statFrame, 'LEFT')
+	-- 	-- Set texture to the appropriate stat icon
+
+	-- 	local statText = statFrame:CreateFontString(nil, 'OVERLAY', 'GameFontNormal')
+	-- 	statText:SetPoint('LEFT', statIcon, 'RIGHT', 10, 0)
+	-- 	statText:SetText(statName .. ': 100') -- Replace with actual stat value
+
+	-- 	return statFrame
+	-- end
+
+	-- local strengthStat = CreateStatDisplay('Strength', -10)
+	-- local agilityStat = CreateStatDisplay('Agility', -50)
+	-- local intellectStat = CreateStatDisplay('Intellect', -90)
+	-- Add more stats as needed
+
+	-- Bottom tabs (similar to RenownFrame)
+	-- local function CreateTab(name, index)
+	-- 	local tab = CreateFrame('Button', nil, frame, 'CharacterFrameTabButtonTemplate')
+	-- 	tab:SetText(name)
+	-- 	tab:SetID(index)
+	-- 	if index == 1 then
+	-- 		tab:SetPoint('BOTTOMLEFT', frame, 'BOTTOMLEFT', 5, -30)
+	-- 	else
+	-- 		tab:SetPoint('LEFT', _G[frame:GetName() .. 'Tab' .. (index - 1)], 'RIGHT', -16, 0)
+	-- 	end
+	-- 	return tab
+	-- end
+
+	-- local characterTab = CreateTab('Character', 1)
+	-- local reputationTab = CreateTab('Reputation', 2)
+	-- local currencyTab = CreateTab('Currency', 3)
+
+	return frame
+end
+
+function LibCS:SetupFrameArt(frame)
+	local textureKit = 'thewarwithin' -- This should be determined based on the character's faction or class
+	-- local textureKit = 'DragonFlight' -- This should be determined based on the character's faction or class
+
+	-- Define the regions we want to apply textures to
+	local mainTextureKitRegions = {
+		['Background'] = 'uiframethewarwithinbackground',
+		['TopGlow'] = 'UI-%s-Highlight-Top',
+		['BottomGlow'] = 'UI-%s-Highlight-Bottom'
+	}
+
+	-- Setup the main textures
+	SetupTextureKitOnRegions(textureKit, frame, mainTextureKitRegions, TextureKitConstants.SetVisibility, TextureKitConstants.UseAtlasSize)
+
+	-- Set border
+	local borderFile = 'UI-Frame-%s-Border'
+	frame.Border:SetAtlas(borderFile:format(textureKit), TextureKitConstants.UseAtlasSize)
+
+	frame.TopBorderDecoration:SetAtlas('ui-frame-' .. textureKit .. '-embellishmenttop', TextureKitConstants.UseAtlasSize)
+
+	-- Set bottom border decoration
+	frame.BottomBorderDecoration:SetAtlas('ui-frame-' .. textureKit .. '-embellishmentbottom', TextureKitConstants.UseAtlasSize)
+
+	frame.portrait.headerFrame.background:SetAtlas('ui-frame-' .. textureKit .. '-subtitle', TextureKitConstants.UseAtlasSize)
+	frame.portrait.footerFrame.background:SetAtlas('ui-frame-' .. textureKit .. '-subtitle', TextureKitConstants.UseAtlasSize)
+	-- frame.portrait.border:SetAtlas('ui-frame-' .. textureKit .. '-portraitwider', TextureKitConstants.UseAtlasSize)
+
+	-- Apply the background
+	frame.Background:SetAtlas('ui-frame-' .. textureKit .. '-backgroundtile', TextureKitConstants.UseAtlasSize)
+	frame.Background:SetAtlas('ui-frame-' .. textureKit .. '-cardparchmentwider', TextureKitConstants.UseAtlasSize)
+	-- /script LibCSCharacterFrame.Background:SetAtlas('hunter-stable-bg-art_tenacity', TextureKitConstants.UseAtlasSize)
+	-- /script LibCSCharacterFrame.Background:SetAtlas('legionmission-complete-background-hunter', TextureKitConstants.UseAtlasSize)
+	frame.Background:Show()
+	-- frame.Background:SetTexture('Interface\\AddOns\\Libs-CharacterScreen\\media\\frame\\UIFrameTheWarWithinBackground')
+	-- /script LibCSCharacterFrame:Show()
+	-- /script LibCSCharacterFrame.portrait:SetSize(200, 300)
+end
+
 function LibCS:OnInitialize()
 	self.database = LibStub('AceDB-3.0'):New('LibCSDB', {profile = DBDefaults})
 	self.DB = self.database.profile -- easy access to the DB
@@ -243,8 +693,16 @@ end
 function LibCS:OnEnable()
 	self:RegisterChatCommand('libcs', 'ChatCommand')
 
+	-- Call this function to create and show the frame
+	local newCharacterFrame = LibCS:CreateNewCharacterFrame()
+	LibCS:SetupFrameArt(newCharacterFrame)
+	newCharacterFrame:Hide()
+	-- newCharacterFrame.portrait:Hide()
+
 	CheckAddionalAddons()
 end
 
 function LibCS:ChatCommand(input)
+	LibCSCharacterFrame.portrait:RefreshUnit()
+	LibCSCharacterFrame:Show()
 end
