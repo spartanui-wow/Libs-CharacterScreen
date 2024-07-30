@@ -317,10 +317,9 @@ local function CreateSlotButton(frame, buttonSize)
 	frame.SlotFrame = container
 
 	local slotArrangement = {
-		[1] = {'HEADSLOT', 'SHOULDERSLOT', 'BACKSLOT', 'CHESTSLOT', 'WRISTSLOT'},
-		[2] = {'HANDSSLOT', 'WAISTSLOT', 'LEGSSLOT', 'FEETSLOT'},
-		[3] = {'MAINHANDSLOT', 'SECONDARYHANDSLOT'},
-		[4] = {'SHIRTSLOT', 'TABARDSLOT'}
+		[1] = {'HEADSLOT', 'NECKSLOT', 'SHOULDERSLOT', 'BACKSLOT', 'CHESTSLOT', 'SHIRTSLOT', 'TABARDSLOT', 'WRISTSLOT'},
+		[2] = {'HANDSSLOT', 'WAISTSLOT', 'LEGSSLOT', 'FEETSLOT', 'FINGER0SLOT', 'FINGER1SLOT', 'TRINKET0SLOT', 'TRINKET1SLOT'},
+		[3] = {'MAINHANDSLOT', 'SECONDARYHANDSLOT'}
 	}
 
 	local buttons = {}
