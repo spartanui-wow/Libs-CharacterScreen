@@ -268,20 +268,14 @@ local function CreateGearButton(parent, slotName, size)
 	button.InnerHighlight:SetAlpha(0)
 
 	-- Scripts
+
+	-- Scripts
 	button:SetScript(
 		'OnEnter',
 		function(self)
-			GameTooltip:SetOwner(self, 'ANCHOR_NONE')
-			GameTooltip:SetPoint('BOTTOMLEFT', self, 'TOPLEFT', 2, 4)
-			if (self.hyperlink) then
-				GameTooltip:SetHyperlink(self.hyperlink)
-				GameTooltip:Show()
-			elseif self.localizedName then
-				GameTooltip:SetText(self.localizedName)
-				GameTooltip:Show()
-			else
-				GameTooltip:Hide()
-			end
+			GameTooltip:SetOwner(self, 'ANCHOR_RIGHT')
+			GameTooltip:SetInventoryItem('player', self.slotID)
+			GameTooltip:Show()
 			self.InnerHighlight:SetAlpha(1)
 		end
 	)
@@ -293,6 +287,32 @@ local function CreateGearButton(parent, slotName, size)
 			self.InnerHighlight:SetAlpha(0)
 		end
 	)
+
+	-- button:SetScript(
+	-- 	'OnEnter',
+	-- 	function(self)
+	-- 		GameTooltip:SetOwner(self, 'ANCHOR_NONE')
+	-- 		GameTooltip:SetPoint('BOTTOMLEFT', self, 'TOPLEFT', 2, 4)
+	-- 		if (self.hyperlink) then
+	-- 			GameTooltip:SetHyperlink(self.hyperlink)
+	-- 			GameTooltip:Show()
+	-- 		elseif self.localizedName then
+	-- 			GameTooltip:SetText(self.localizedName)
+	-- 			GameTooltip:Show()
+	-- 		else
+	-- 			GameTooltip:Hide()
+	-- 		end
+	-- 		self.InnerHighlight:SetAlpha(1)
+	-- 	end
+	-- )
+
+	-- button:SetScript(
+	-- 	'OnLeave',
+	-- 	function(self)
+	-- 		GameTooltip:Hide()
+	-- 		self.InnerHighlight:SetAlpha(0)
+	-- 	end
+	-- )
 
 	button:SetScript(
 		'OnClick',
@@ -311,10 +331,48 @@ local function CreateGearButton(parent, slotName, size)
 	return button
 end
 
-local function CreateSlotButton(frame, buttonSize)
-	local container = CreateFrame('Frame', nil, frame)
-	container:SetPoint('BOTTOMLEFT', frame, 'BOTTOMLEFT', 0, 0)
-	frame.SlotFrame = container
+local function PositionGearButtons(gearManager, buttons, slotArrangement)
+	local leftStart = 0
+	local rightStart = 0
+	local bottomStart = 10
+	local verticalSpacing = 5
+	local horizontalSpacing = 5
+
+	-- Position left side buttons
+	for i, slotName in ipairs(slotArrangement[1]) do
+		local button = buttons[slotName]
+		if button then
+			button:SetPoint('TOPRIGHT', gearManager, 'TOPLEFT', leftStart, -((i - 1) * (button:GetHeight() + verticalSpacing)))
+		end
+	end
+
+	-- Position right side buttons
+	for i, slotName in ipairs(slotArrangement[2]) do
+		local button = buttons[slotName]
+		if button then
+			button:SetPoint('TOPLEFT', gearManager, 'TOPRIGHT', rightStart, -((i - 1) * (button:GetHeight() + verticalSpacing)))
+		end
+	end
+
+	-- Position bottom buttons
+	local totalBottomWidth = (#slotArrangement[3] * buttons[slotArrangement[3][1]]:GetWidth()) + ((#slotArrangement[3] - 1) * horizontalSpacing)
+	local startX = (gearManager:GetWidth() - totalBottomWidth) / 2
+
+	for i, slotName in ipairs(slotArrangement[3]) do
+		local button = buttons[slotName]
+		if button then
+			button:SetPoint('BOTTOMLEFT', gearManager, 'BOTTOMLEFT', bottomStart + ((i - 1) * (button:GetWidth() + (200 - button:GetWidth() - bottomStart))), 5)
+		end
+	end
+end
+
+function CreateSlotButton(frame)
+	local portraitFrame = frame.portrait -- Assuming the portrait frame is stored here
+	local gearManager = CreateFrame('Frame', nil, frame)
+	gearManager:SetAllPoints(portraitFrame)
+
+	local buttonSize = 40 -- Adjust as needed
+	local buttons = {}
 
 	local slotArrangement = {
 		[1] = {'HEADSLOT', 'NECKSLOT', 'SHOULDERSLOT', 'BACKSLOT', 'CHESTSLOT', 'SHIRTSLOT', 'TABARDSLOT', 'WRISTSLOT'},
@@ -322,38 +380,23 @@ local function CreateSlotButton(frame, buttonSize)
 		[3] = {'MAINHANDSLOT', 'SECONDARYHANDSLOT'}
 	}
 
-	local buttons = {}
-	local buttonWidth = buttonSize
-	local offsetY = buttonSize * 0.46 -- 46% of button size
-	local buttonGap = buttonSize * 0.15 -- 15% of button size
-	local extrudeX = buttonSize * 0.62 -- 62% of button size
-	local fullWidth = extrudeX
-
-	for sectorIndex = 1, #slotArrangement do
-		if sectorIndex ~= 1 then
-			fullWidth = fullWidth + buttonSize * 0.46 -- 46% of button size
-		end
-		for i = 1, #slotArrangement[sectorIndex] do
-			local slotName = slotArrangement[sectorIndex][i]
-			local button = CreateGearButton(container, slotName, buttonSize)
-			button:SetPoint('BOTTOMLEFT', container, 'BOTTOMLEFT', fullWidth, offsetY)
-
-			buttons[button.slotID] = button
-			fullWidth = fullWidth + buttonWidth + buttonGap
+	for _, group in ipairs(slotArrangement) do
+		for _, slotName in ipairs(group) do
+			buttons[slotName] = CreateGearButton(gearManager, slotName, buttonSize)
 		end
 	end
 
-	container:SetWidth(fullWidth + extrudeX)
-	container:SetHeight(buttonSize * 3.85) -- Adjust as needed
+	PositionGearButtons(gearManager, buttons, slotArrangement)
 
-	frame.DressingRoomItemButtons = buttons
+	frame.GearManager = gearManager
+	frame.GearButtons = buttons
 
 	-- Function to update button icons with equipped items
 	frame.UpdateEquippedItems = function()
-		for slotID, button in pairs(buttons) do
-			local itemID = GetInventoryItemID('player', slotID)
+		for slotName, button in pairs(buttons) do
+			local itemID = GetInventoryItemID('player', button.slotID)
 			if itemID then
-				local itemTexture = C_Item.GetItemIconByID(itemID)
+				local itemTexture = GetItemIcon(itemID)
 				button.ItemIcon:SetTexture(itemTexture)
 			else
 				button.ItemIcon:SetTexture(button.emptyTexture)
