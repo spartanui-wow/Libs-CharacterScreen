@@ -1,5 +1,5 @@
----@class LibCS : AceAddon, AceConsole-3.0
-local LibCS = LibStub('AceAddon-3.0'):NewAddon('LibCS', 'AceConsole-3.0')
+---@class LibCS : AceAddon, AceConsole-3.0, AceEvent-3.0
+local LibCS = LibStub('AceAddon-3.0'):NewAddon('LibCS', 'AceConsole-3.0', 'AceEvent-3.0')
 ---@diagnostic disable-next-line: undefined-field
 -- local L = LibStub('AceLocale-3.0'):GetLocale('LibCS', true) ---@type LibCS_locale
 -- LibCS.L = L
@@ -9,11 +9,18 @@ local DBDefaults = {
 	enabled = true,
 	offset = 100,
 	background = {
+		DynamicImage = true,
+		image = 'ui-frame-thewarwithin-backgroundtile',
 		color = {
 			0.1,
 			0.1,
 			0.1,
 			0.8
+		},
+		border = {
+			enabled = true,
+			alpha = .7,
+			scale = .25
 		}
 	},
 	padding = {
@@ -227,9 +234,16 @@ local function CheckAddionalAddons()
 	end
 end
 
+---@param parent Frame
+---@param slotName InventorySlotName
+---@param size number
+---@return LibCS.GearFrame.Button
 local function CreateGearButton(parent, slotName, size)
+	---@class LibCS.GearFrame.Button : Button
 	local button = CreateFrame('Button', nil, parent)
 	button:SetSize(size, size)
+	button:RegisterForDrag('LeftButton')
+	button:RegisterForClicks('LeftButtonUp', 'RightButtonUp')
 
 	local slotID, textureName = GetInventorySlotInfo(slotName)
 	button.slotID = slotID
@@ -258,6 +272,8 @@ local function CreateGearButton(parent, slotName, size)
 	button.Border:SetSize(borderSize, borderSize)
 	button.Border:SetPoint('CENTER')
 	button.Border:SetTexCoord(0, 0.5, 0, 1)
+
+	-- auctionhouse-itemicon-border-blue
 
 	-- Inner Highlight
 	button.InnerHighlight = button:CreateTexture(nil, 'OVERLAY')
@@ -331,6 +347,9 @@ local function CreateGearButton(parent, slotName, size)
 	return button
 end
 
+---@param gearManager LibCS.GearFrame
+---@param buttons table
+---@param slotArrangement table
 local function PositionGearButtons(gearManager, buttons, slotArrangement)
 	local leftStart = 0
 	local rightStart = 0
@@ -355,24 +374,38 @@ local function PositionGearButtons(gearManager, buttons, slotArrangement)
 	end
 
 	-- Position bottom buttons
-	local totalBottomWidth = (#slotArrangement[3] * buttons[slotArrangement[3][1]]:GetWidth()) + ((#slotArrangement[3] - 1) * horizontalSpacing)
-	local startX = (gearManager:GetWidth() - totalBottomWidth) / 2
+	if #slotArrangement[3] == 2 then
+		local leftButton = buttons[slotArrangement[3][1]]
+		local rightButton = buttons[slotArrangement[3][2]]
 
-	for i, slotName in ipairs(slotArrangement[3]) do
-		local button = buttons[slotName]
-		if button then
-			button:SetPoint('BOTTOMLEFT', gearManager, 'BOTTOMLEFT', bottomStart + ((i - 1) * (button:GetWidth() + (200 - button:GetWidth() - bottomStart))), 5)
+		if leftButton then
+			leftButton:SetPoint('BOTTOMLEFT', gearManager, 'BOTTOMLEFT', bottomStart, 5)
+		end
+
+		if rightButton then
+			rightButton:SetPoint('BOTTOMRIGHT', gearManager, 'BOTTOMRIGHT', -bottomStart, 5)
+		end
+	else
+		-- Fallback positioning if there are not exactly 2 bottom buttons
+		for i, slotName in ipairs(slotArrangement[3]) do
+			local button = buttons[slotName]
+			if button then
+				button:SetPoint('BOTTOMLEFT', gearManager, 'BOTTOMLEFT', bottomStart + ((i - 1) * (button:GetWidth() + horizontalSpacing)), 5)
+			end
 		end
 	end
 end
 
-function CreateSlotButton(frame)
-	local portraitFrame = frame.portrait -- Assuming the portrait frame is stored here
+---@param frame LibCS.Frame
+---@return LibCS.GearFrame
+function CreateGearManager(frame)
+	---@class LibCS.GearFrame : Frame
 	local gearManager = CreateFrame('Frame', nil, frame)
-	gearManager:SetAllPoints(portraitFrame)
+	gearManager:SetPoint('TOPLEFT', frame.Portrait)
+	gearManager:SetPoint('BOTTOMRIGHT', frame.Portrait, 0, frame.Portrait.footerFrame:GetHeight() + 10)
 
 	local buttonSize = 40 -- Adjust as needed
-	local buttons = {}
+	local buttons = {} ---@type table<InventorySlotName, LibCS.GearFrame.Button>
 
 	local slotArrangement = {
 		[1] = {'HEADSLOT', 'NECKSLOT', 'SHOULDERSLOT', 'BACKSLOT', 'CHESTSLOT', 'SHIRTSLOT', 'TABARDSLOT', 'WRISTSLOT'},
@@ -388,15 +421,14 @@ function CreateSlotButton(frame)
 
 	PositionGearButtons(gearManager, buttons, slotArrangement)
 
-	frame.GearManager = gearManager
-	frame.GearButtons = buttons
+	gearManager.GearButtons = buttons
 
 	-- Function to update button icons with equipped items
-	frame.UpdateEquippedItems = function()
+	gearManager.Update = function()
 		for slotName, button in pairs(buttons) do
 			local itemID = GetInventoryItemID('player', button.slotID)
 			if itemID then
-				local itemTexture = GetItemIcon(itemID)
+				local itemTexture = C_Item.GetItemIconByID(itemID)
 				button.ItemIcon:SetTexture(itemTexture)
 			else
 				button.ItemIcon:SetTexture(button.emptyTexture)
@@ -405,24 +437,57 @@ function CreateSlotButton(frame)
 	end
 
 	-- Initial update of equipped items
-	frame:UpdateEquippedItems()
+	gearManager:Update()
+
+	return gearManager
 end
 
+---@param frame Frame
+---@return LibCS.Portrait
 local function CreatePortrait(frame)
-	-- Character portrait (center of the frame)
+	---@class LibCS.Portrait : PlayerModel
 	local portrait = CreateFrame('PlayerModel', nil, frame)
 	portrait:SetSize(231, frame:GetHeight() - 50)
 	portrait:SetPoint('CENTER', frame, 'CENTER', 0, 0)
 	portrait:SetUnit('player')
-	portrait.border = portrait:CreateTexture(nil, 'ARTWORK')
-	portrait.border:SetAllPoints(portrait)
+
+	-- Gradient
+	portrait.Gradient = portrait:CreateTexture(nil, 'BACKGROUND', nil, 2)
+	portrait.Gradient:SetPoint('TOPLEFT', -100, 50)
+	portrait.Gradient:SetPoint('BOTTOMRIGHT', 100, -25)
+	portrait.Gradient:SetTexture('Interface\\AddOns\\Libs-CharacterScreen\\media\\Gradient.jpg')
+	portrait.Gradient:SetAlpha(0.1)
+
+	-- Background
+	portrait.Background = portrait:CreateTexture(nil, 'BACKGROUND')
+	portrait.Background:SetPoint('CENTER')
+	-- portrait.Background:SetSize(portrait:GetWidth() * 1.5, portrait:GetHeight() * 1.5) -- Make it larger than the portrait
+	portrait.Background:SetAtlas('gearUpdate-BG', true)
+	portrait.Background:SetScale(.75)
+	portrait.Background:SetAlpha(0.7)
+
+	-- Mask
+	portrait.Mask = portrait:CreateMaskTexture()
+	portrait.Mask:SetTexture('Interface\\AddOns\\Libs-CharacterScreen\\media\\RingMask.png')
+	portrait.Mask:SetAllPoints(portrait.Gradient)
+	portrait.Background:AddMaskTexture(portrait.Mask)
+	portrait.Gradient:AddMaskTexture(portrait.Mask)
+
+	-- Line Mask
+	portrait.LineMask = portrait:CreateMaskTexture()
+	portrait.LineMask:SetTexture('Interface\\AddOns\\SpartanUI\\images\\Menu\\SquareMask', 'CLAMPTOBLACKADDITIVE', 'CLAMPTOBLACKADDITIVE')
+	portrait.LineMask:SetPoint('TOPLEFT', portrait.Gradient, 'TOPLEFT', 100, 0)
+	portrait.LineMask:SetPoint('BOTTOMRIGHT', portrait.Gradient, 'BOTTOMRIGHT', -100, 0)
+	portrait.Gradient:AddMaskTexture(portrait.LineMask)
+	portrait.Background:AddMaskTexture(portrait.LineMask)
 
 	-- Character name and level
-	local characterHeaderFrame = CreateFrame('Frame', nil, frame)
+	local characterHeaderFrame = CreateFrame('Frame', nil, portrait)
 	characterHeaderFrame:SetSize(200, 30)
 	characterHeaderFrame:SetPoint('TOP', portrait, 'TOP', 0, -10)
 	characterHeaderFrame.background = characterHeaderFrame:CreateTexture(nil, 'ARTWORK')
 	characterHeaderFrame.background:SetPoint('CENTER', characterHeaderFrame, 'CENTER', 0, 0)
+	characterHeaderFrame.background:SetAtlas('ui-frame-thewarwithin-subtitle', true)
 
 	characterHeaderFrame.Label = characterHeaderFrame:CreateFontString(nil, 'ARTWORK', 'GameFontNormalLarge')
 	characterHeaderFrame.Label:SetPoint('CENTER', characterHeaderFrame, 'CENTER', 0, 0)
@@ -434,26 +499,31 @@ local function CreatePortrait(frame)
 	local spec = GetSpecialization()
 	local specName = spec and (select(2, GetSpecializationInfo(spec)) .. ' ') or ''
 
-	local characterFooterFrame = CreateFrame('Frame', nil, frame)
+	local characterFooterFrame = CreateFrame('Frame', nil, portrait)
 	characterFooterFrame:SetSize(200, 30)
 	characterFooterFrame:SetPoint('BOTTOM', portrait, 'BOTTOM', 0, 10)
 	characterFooterFrame.background = characterFooterFrame:CreateTexture(nil, 'ARTWORK')
 	characterFooterFrame.background:SetPoint('CENTER', characterFooterFrame, 'CENTER', 0, 0)
+	characterFooterFrame.background:SetAtlas('gearUpdate-BG', true)
 
 	characterFooterFrame.Label = characterFooterFrame:CreateFontString(nil, 'ARTWORK', 'GameFontNormalLarge')
 	characterFooterFrame.Label:SetPoint('CENTER', characterFooterFrame, 'CENTER', 0, 0)
 	characterFooterFrame.Label:SetText(specName .. class)
 	portrait.footerFrame = characterFooterFrame
 
-	frame.portrait = portrait
-
 	return portrait
+end
+
+local function NameUpdate()
+	LibCS.Frame.Portrait.headerFrame.Label:SetText(UnitLevel('player') .. ' ' .. UnitName('player'))
 end
 
 function LibCS:CreateNewCharacterFrame()
 	-- Main frame
+	---@class LibCS.Frame : Frame
 	local frame = CreateFrame('Frame', 'LibCSCharacterFrame', UIParent)
-	frame:SetSize(640, 480)
+	frame:SetSize(660, 500)
+	frame:SetFrameLevel(500)
 	frame:SetPoint('CENTER')
 	frame:SetMovable(true)
 	frame:EnableMouse(true)
@@ -463,8 +533,17 @@ function LibCS:CreateNewCharacterFrame()
 
 	-- Background
 	frame.Background = frame:CreateTexture(nil, 'BACKGROUND')
-	frame.Background:SetAllPoints(frame)
+	frame.Background:SetPoint('CENTER')
 	frame.Background:Show()
+
+	-- Create a mask texture
+	local maskTexture = frame:CreateMaskTexture()
+	maskTexture:SetTexture('Interface\\AddOns\\Libs-CharacterScreen\\media\\masks\\SquareMask', 'CLAMPTOBLACKADDITIVE', 'CLAMPTOBLACKADDITIVE')
+	maskTexture:SetPoint('TOPLEFT', frame, 'TOPLEFT', -1, 1)
+	maskTexture:SetPoint('BOTTOMRIGHT', frame, 'BOTTOMRIGHT', 1, -1)
+
+	-- Apply the mask to the background
+	frame.Background:AddMaskTexture(maskTexture)
 
 	-- Top Glow
 	frame.TopGlow = frame:CreateTexture(nil, 'ARTWORK')
@@ -477,6 +556,8 @@ function LibCS:CreateNewCharacterFrame()
 	-- Border
 	frame.Border = frame:CreateTexture(nil, 'BORDER')
 	frame.Border:SetAllPoints()
+	frame.Border:SetScale(self.DB.background.border.scale)
+	frame.Border:SetAlpha(self.DB.background.border.alpha)
 
 	-- NineSlice frame (for additional border elements)
 	frame.NineSlice = CreateFrame('Frame', nil, frame)
@@ -485,20 +566,24 @@ function LibCS:CreateNewCharacterFrame()
 	-- Top border decorations
 	frame.TopBorderDecoration = frame:CreateTexture(nil, 'OVERLAY')
 	frame.TopBorderDecoration:SetPoint('TOP', frame, 'TOP')
+	frame.TopBorderDecoration:SetScale(self.DB.background.border.scale + .1)
+	frame.TopBorderDecoration:SetAlpha(self.DB.background.border.alpha)
 
 	-- Bottom border decoration
 	frame.BottomBorderDecoration = frame:CreateTexture(nil, 'OVERLAY')
 	frame.BottomBorderDecoration:SetPoint('BOTTOM', frame, 'BOTTOM')
+	frame.BottomBorderDecoration:SetScale(self.DB.background.border.scale + .1)
+	frame.BottomBorderDecoration:SetAlpha(self.DB.background.border.alpha)
 
 	-- Close button
 	frame.CloseButton = CreateFrame('Button', nil, frame, 'UIPanelCloseButton')
 	frame.CloseButton:SetPoint('TOPRIGHT', frame, 'TOPRIGHT', -9, -9)
 
 	-- Portrait
-	frame.portrait = CreatePortrait(frame)
+	frame.Portrait = CreatePortrait(frame)
 
 	-- Create gear buttons
-	CreateSlotButton(frame)
+	frame.GearManager = CreateGearManager(frame)
 
 	-- frame.GearButtons = {}
 	-- local slotArrangement = {
@@ -580,6 +665,7 @@ function LibCS:CreateNewCharacterFrame()
 	return frame
 end
 
+---@param frame LibCS.Frame
 function LibCS:SetupFrameArt(frame)
 	local textureKit = 'thewarwithin' -- This should be determined based on the character's faction or class
 	-- local textureKit = 'DragonFlight' -- This should be determined based on the character's faction or class
@@ -603,14 +689,14 @@ function LibCS:SetupFrameArt(frame)
 	-- Set bottom border decoration
 	frame.BottomBorderDecoration:SetAtlas('ui-frame-' .. textureKit .. '-embellishmentbottom', TextureKitConstants.UseAtlasSize)
 
-	frame.portrait.headerFrame.background:SetAtlas('ui-frame-' .. textureKit .. '-subtitle', TextureKitConstants.UseAtlasSize)
-	frame.portrait.footerFrame.background:SetAtlas('ui-frame-' .. textureKit .. '-subtitle', TextureKitConstants.UseAtlasSize)
+	frame.Portrait.headerFrame.background:SetAtlas('ui-frame-' .. textureKit .. '-subtitle', TextureKitConstants.UseAtlasSize)
+	frame.Portrait.footerFrame.background:SetAtlas('ui-frame-' .. textureKit .. '-subtitle', TextureKitConstants.UseAtlasSize)
 	-- frame.portrait.border:SetAtlas('ui-frame-' .. textureKit .. '-portraitwider', TextureKitConstants.UseAtlasSize)
 
 	-- Apply the background
 	-- frame.Background:SetAtlas('ui-frame-' .. textureKit .. '-backgroundtile', TextureKitConstants.UseAtlasSize)
 	-- frame.Background:SetAtlas('ui-frame-' .. textureKit .. '-cardparchmentwider', TextureKitConstants.UseAtlasSize)
-	local visual, isAtlas = LibCS:GetSpecializationVisual()
+	local visual, isAtlas = LibCS:GetDynamicBackground()
 	if isAtlas then
 		frame.Background:SetAtlas(visual, TextureKitConstants.UseAtlasSize)
 	else
@@ -626,7 +712,7 @@ end
 
 function LibCS:OnInitialize()
 	self.database = LibStub('AceDB-3.0'):New('LibCSDB', {profile = DBDefaults})
-	self.DB = self.database.profile -- easy access to the DB
+	self.DB = self.database.profile ---@type LibCS.DB
 
 	self:RegisterChatCommand('libcs', 'ChatCommand')
 
@@ -634,19 +720,96 @@ function LibCS:OnInitialize()
 	C_AddOns.LoadAddOn('Blizzard_TokenUI')
 	WeeklyRewards_LoadUI()
 
-	Strip()
+	-- Strip()
 end
 
 function LibCS:OnEnable()
 	self:RegisterChatCommand('libcs', 'ChatCommand')
 
 	-- Call this function to create and show the frame
-	local newCharacterFrame = LibCS:CreateNewCharacterFrame()
-	LibCS:SetupFrameArt(newCharacterFrame)
-	newCharacterFrame:Hide()
-	-- newCharacterFrame.portrait:Hide()
+	---@class LibCS.Frame : Frame
+	LibCS.Frame = LibCS:CreateNewCharacterFrame()
+	LibCS:SetupFrameArt(LibCS.Frame)
+	LibCS.Frame:Hide()
 
 	CheckAddionalAddons()
+
+	CharacterFrame:HookScript(
+		'OnShow',
+		function()
+			LibCS.Frame:Show()
+			LibCS:RegisterEvent('UNIT_MODEL_CHANGED')
+		end
+	)
+	CharacterFrame:HookScript(
+		'OnHide',
+		function()
+			LibCS.Frame:Hide()
+			LibCS:UnregisterEvent('UNIT_MODEL_CHANGED')
+		end
+	)
+
+	-- self:RegisterEvent('PLAYER_ENTERING_WORLD')
+	-- self:RegisterEvent('CHARACTER_POINTS_CHANGED')
+	-- self:RegisterEvent('UNIT_STATS')
+	-- self:RegisterEvent('UNIT_RANGEDDAMAGE')
+	-- self:RegisterEvent('UNIT_ATTACK_POWER')
+	-- self:RegisterEvent('UNIT_RANGED_ATTACK_POWER')
+	-- self:RegisterEvent('UNIT_ATTACK')
+	self:RegisterEvent('UNIT_LEVEL', NameUpdate)
+	self:RegisterEvent('UNIT_NAME_UPDATE', NameUpdate)
+	-- self:RegisterEvent('UNIT_SPELL_HASTE')
+	-- self:RegisterEvent('UNIT_RESISTANCES')
+	-- self:RegisterEvent('PLAYER_GUILD_UPDATE')
+	-- self:RegisterEvent('SKILL_LINES_CHANGED')
+	-- self:RegisterEvent('COMBAT_RATING_UPDATE')
+	-- self:RegisterEvent('MASTERY_UPDATE')
+	-- self:RegisterEvent('SPEED_UPDATE')
+	-- self:RegisterEvent('LIFESTEAL_UPDATE')
+	-- self:RegisterEvent('AVOIDANCE_UPDATE')
+	-- self:RegisterEvent('KNOWN_TITLES_UPDATE')
+	-- self:RegisterEvent('PLAYER_TALENT_UPDATE')
+	-- self:RegisterEvent('BAG_UPDATE')
+	-- self:RegisterEvent('PLAYER_EQUIPMENT_CHANGED')
+	-- self:RegisterEvent('PLAYER_AVG_ITEM_LEVEL_UPDATE')
+	-- self:RegisterEvent('PLAYER_DAMAGE_DONE_MODS')
+	-- self:RegisterEvent('ACTIVE_TALENT_GROUP_CHANGED')
+	-- self:RegisterUnitEvent('UNIT_DAMAGE', 'player')
+	-- self:RegisterUnitEvent('UNIT_ATTACK_SPEED', 'player')
+	-- self:RegisterUnitEvent('UNIT_MAXHEALTH', 'player')
+	-- self:RegisterUnitEvent('UNIT_AURA', 'player')
+	-- self:RegisterEvent('SPELL_POWER_CHANGED')
+	-- self:RegisterEvent('CHARACTER_ITEM_FIXUP_NOTIFICATION')
+	---@diagnostic disable-next-line: param-type-mismatch
+	-- self:RegisterEvent('TRIAL_STATUS_UPDATE')
+	-- self:RegisterEvent('PLAYER_TARGET_CHANGED')
+	LibCS:RegisterEvent('ACTIVE_PLAYER_SPECIALIZATION_CHANGED')
+end
+
+function LibCS:UNIT_MODEL_CHANGED()
+	LibCS.Frame.Portrait:RefreshUnit()
+end
+
+function LibCS:ACTIVE_PLAYER_SPECIALIZATION_CHANGED()
+	local visual, isAtlas = LibCS:GetDynamicBackground()
+	if isAtlas and visual then
+		LibCS.Frame.Background:SetAtlas(visual, TextureKitConstants.UseAtlasSize)
+	else
+		LibCS.Frame.Background:SetTexture(visual)
+	end
+
+	if LibCS.DB.background.border.enabled then
+		LibCS.Frame.Border:Show()
+	else
+		LibCS.Frame.Border:Hide()
+	end
+
+	-- Character Spec label
+	local class = UnitClass('player')
+	local spec = GetSpecialization()
+	local specName = spec and (select(2, GetSpecializationInfo(spec)) .. ' ') or ''
+
+	LibCS.Frame.Portrait.footerFrame.Label:SetText(specName .. class)
 end
 
 function LibCS:ChatCommand(input)
@@ -709,7 +872,9 @@ local SpecializationVisuals = {
 	[0073] = 'warrior-protection'
 }
 
-function LibCS:GetSpecializationVisual(specID)
+---@param specID? number
+---@return string?, boolean?
+function LibCS:GetDynamicBackground(specID)
 	-- returns specializationID on retail
 	if GetSpecialization then
 		local currentSpecialization = GetSpecialization()
@@ -722,5 +887,9 @@ function LibCS:GetSpecializationVisual(specID)
 	local atlas = visual and ('talents-background-%s'):format(visual)
 	if atlas and C_Texture.GetAtlasInfo(atlas) then
 		return atlas, true
+	end
+	local classBG = 'Artifacts-' .. UnitClass('player') .. '-BG'
+	if C_Texture.GetAtlasInfo(classBG) then
+		return classBG, true
 	end
 end
