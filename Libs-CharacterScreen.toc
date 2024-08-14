@@ -1,4 +1,4 @@
-## Interface: 110000
+## Interface: 110002
 ## Title: Libs - Character Screen
 ## Notes: Enchanced Character Screen
 ## IconTexture: Interface/Addons/Libs-CharacterScreen/Logo-Icon
