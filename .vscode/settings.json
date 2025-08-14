@@ -99,7 +99,6 @@
     "BLUE_FONT_COLOR",
     "PaperDollItemsFrame",
     "LE_EXPANSION_DRAGONFLIGHT",
-    "GetText",
     "ENCHANTED_TOOLTIP_LINE",
     "ITEM_LEVEL",
     "ADDON_MISSING",
@@ -153,7 +152,12 @@
     "ReloadUI",
     "ROTATE_MINIMAP",
     "OPTION_TOOLTIP_ROTATE_MINIMAP",
-    "ERR_NOT_IN_COMBAT"
+    "ERR_NOT_IN_COMBAT",
+    "EquipmentFlyoutFrameHighlight",
+    "EquipmentFlyoutFrame",
+    "SOUNDKIT",
+    "LEVEL",
+    "PawnUI_InventoryPawnButton"
   ],
   "Lua.runtime.version": "Lua 5.1",
   "Lua.runtime.builtin": {
@@ -168,6 +172,10 @@
     "utf8": "disable"
   },
   "Lua.workspace.library": [
-    "~\\.vscode\\extensions\\ketho.wow-api-0.16.5\\Annotations"
-  ]
+    "~\\.vscode\\extensions\\ketho.wow-api-0.20.8\\Annotations\\Core"
+  ],
+  "Lua.workspace.ignoreDir": [".vscode", "libs/*"],
+  "Lua.type.weakUnionCheck": true,
+  "Lua.codeLens.enable": false,
+  "Lua.diagnostics.ignoredFiles": "Disable"
 }

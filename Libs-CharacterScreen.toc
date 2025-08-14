@@ -1,4 +1,4 @@
-## Interface: 110002
+## Interface: 110007
 ## Title: Libs - Character Screen
 ## Notes: Enchanced Character Screen
 ## IconTexture: Interface/Addons/Libs-CharacterScreen/Logo-Icon
@@ -9,5 +9,18 @@
 ## X-Github: https://github.com/Wutname1/Libs-CharacterScreen
 
 Libs/Ace3/Ace3.xml
+Libs/LibSharedMedia-3.0/lib.xml
+Libs/LibCompress/lib.xml
+Libs/LibBase64-1.0/lib.xml
 
 LibCS.lua
+core/Framework.lua
+core/Database.lua
+core/FrameManager.lua
+core/Core.lua
+modules/Portrait.lua
+modules/Equipment.lua
+modules/AddonIntegration.lua
+modules/CircularStats.lua
+modules/Notifications.lua
+modules/LootSpec.lua
