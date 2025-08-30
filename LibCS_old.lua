@@ -1,5 +1,4 @@
 ---@diagnostic disable
----@class LibCS : AceAddon, AceConsole-3.0, AceEvent-3.0
 local LibCS = LibStub('AceAddon-3.0'):NewAddon('LibCS', 'AceConsole-3.0', 'AceEvent-3.0')
 LibCS:SetDefaultModuleLibraries('AceEvent-3.0', 'AceTimer-3.0')
 _G.LibCS = LibCS
@@ -210,12 +209,7 @@ local function CheckAddionalAddons()
 	end
 end
 
----@param parent Frame
----@param slotName InventorySlotName
----@param size number
----@return LibCS.GearFrame.Button
 local function CreateGearButton(parent, slotName, size)
-	---@class LibCS.GearFrame.Button : Button
 	local button = CreateFrame('Button', nil, parent)
 	button:SetSize(size, size)
 	button:RegisterForDrag('LeftButton')
@@ -323,9 +317,6 @@ local function CreateGearButton(parent, slotName, size)
 	return button
 end
 
----@param gearManager LibCS.GearFrame
----@param buttons table
----@param slotArrangement table
 local function PositionGearButtons(gearManager, buttons, slotArrangement)
 	local leftStart = 0
 	local rightStart = 0
@@ -372,10 +363,7 @@ local function PositionGearButtons(gearManager, buttons, slotArrangement)
 	end
 end
 
----@param frame LibCS.Frame
----@return LibCS.GearFrame
 function CreateGearManager(frame)
-	---@class LibCS.GearFrame : Frame
 	local gearManager = CreateFrame('Frame', nil, frame)
 	gearManager:SetPoint('TOPLEFT', frame.Portrait)
 	gearManager:SetPoint('BOTTOMRIGHT', frame.Portrait, 0, frame.Portrait.footerFrame:GetHeight() + 10)
@@ -447,7 +435,6 @@ end
 ---@param frame Frame
 ---@return LibCS.Portrait
 local function CreatePortrait(frame)
-	---@class LibCS.Portrait : PlayerModel
 	local portrait = CreateFrame('PlayerModel', nil, frame)
 	portrait:SetSize(231, frame:GetHeight() - 50)
 	portrait:SetPoint('CENTER', frame, 'CENTER', 0, 0)
@@ -522,7 +509,6 @@ end
 
 function LibCS:CreateNewCharacterFrame()
 	-- Main frame
-	---@class LibCS.Frame : Frame
 	local frame = CreateFrame('Frame', 'LibCSCharacterFrame', UIParent)
 	frame:SetSize(660, 500)
 	frame:SetFrameLevel(500)
@@ -697,7 +683,6 @@ function LibCS:OnEnable()
 	self:RegisterChatCommand('libcs', 'ChatCommand')
 
 	-- Call this function to create and show the frame
-	---@class LibCS.Frame : Frame
 	LibCS.Frame = LibCS:CreateNewCharacterFrame()
 	LibCS:SetupFrameArt(LibCS.Frame)
 	LibCS.Frame:Hide()
