@@ -31,6 +31,37 @@ end
 LibCS.AddLib('AceDB', 'AceDB-3.0')
 LibCS.AddLib('AceConfig', 'AceConfig-3.0')
 LibCS.AddLib('AceConfigDialog', 'AceConfigDialog-3.0')
+LibCS.AddLib('AceSerializer', 'AceSerializer-3.0')
+
+-- Setup Logger - use LibAT if available, otherwise create a fallback
+if LibAT and LibAT.Logger then
+	LibCS.Logger = LibAT.Logger.RegisterAddon('LibCS')
+else
+	-- Fallback logger that prints to console (enable for debugging)
+	local DEBUG_ENABLED = true -- Set to false to silence debug output
+	local function debugPrint(level, msg)
+		if DEBUG_ENABLED then
+			print('|cff00ff00LibCS|r [' .. level .. ']: ' .. tostring(msg))
+		end
+	end
+	LibCS.Logger = {
+		debug = function(msg)
+			debugPrint('DEBUG', msg)
+		end,
+		info = function(msg)
+			debugPrint('INFO', msg)
+		end,
+		warning = function(msg)
+			debugPrint('WARN', msg)
+		end,
+		error = function(msg)
+			debugPrint('ERROR', msg)
+		end,
+		critical = function(msg)
+			debugPrint('CRIT', msg)
+		end,
+	}
+end
 
 -- Specialization to background visual mapping
 ---@type table<number, string>
@@ -73,7 +104,7 @@ local SpecializationVisuals = {
 	[0267] = 'warlock-destruction',
 	[0071] = 'warrior-arms',
 	[0072] = 'warrior-fury',
-	[0073] = 'warrior-protection'
+	[0073] = 'warrior-protection',
 }
 
 -- Core utility functions

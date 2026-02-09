@@ -161,16 +161,12 @@ local function CheckAddionalAddons()
 		end
 
 		-- Keep the button from being moved
-		hooksecurefunc(
-			frame,
-			'SetPoint',
-			function(frame, _, anchor)
-				if anchor ~= myAnchor then
-					frame:ClearAllPoints()
-					frame:SetPoint('TOPLEFT', myAnchor, 'TOPRIGHT', 0, 0)
-				end
+		hooksecurefunc(frame, 'SetPoint', function(frame, _, anchor)
+			if anchor ~= myAnchor then
+				frame:ClearAllPoints()
+				frame:SetPoint('TOPLEFT', myAnchor, 'TOPRIGHT', 0, 0)
 			end
-		)
+		end)
 
 		-- Add the button to the list of buttons
 		table.insert(AddonButtons, frame)
@@ -198,13 +194,10 @@ local function CheckAddionalAddons()
 		local SimcButton = CreateFrame('Button', 'LibCS_SimcButton', CharacterFrame, 'UIPanelButtonTemplate')
 		SimcButton:SetText('SimC')
 		SimcButton:SetSize(50, 22)
-		SimcButton:SetScript(
-			'OnClick',
-			function()
-				local Simulationcraft = LibStub('AceAddon-3.0'):GetAddon('Simulationcraft')
-				Simulationcraft:PrintSimcProfile(false, false, false)
-			end
-		)
+		SimcButton:SetScript('OnClick', function()
+			local Simulationcraft = LibStub('AceAddon-3.0'):GetAddon('Simulationcraft')
+			Simulationcraft:PrintSimcProfile(false, false, false)
+		end)
 		AddAddonButton(SimcButton)
 	end
 end
@@ -256,63 +249,45 @@ local function CreateGearButton(parent, slotName, size)
 	-- Scripts
 
 	-- Scripts
-	button:SetScript(
-		'OnEnter',
-		function(self)
-			GameTooltip:SetOwner(self, 'ANCHOR_RIGHT')
-			GameTooltip:SetInventoryItem('player', self.slotID)
+	button:SetScript('OnEnter', function(self)
+		GameTooltip:SetOwner(self, 'ANCHOR_RIGHT')
+		GameTooltip:SetInventoryItem('player', self.slotID)
+		GameTooltip:Show()
+		self.InnerHighlight:SetAlpha(1)
+	end)
+
+	button:SetScript('OnLeave', function(self)
+		GameTooltip:Hide()
+		self.InnerHighlight:SetAlpha(0)
+	end)
+
+	button:SetScript('OnEnter', function(self)
+		GameTooltip:SetOwner(self, 'ANCHOR_NONE')
+		GameTooltip:SetPoint('BOTTOMLEFT', self, 'TOPLEFT', 2, 4)
+		if self.hyperlink then
+			GameTooltip:SetHyperlink(self.hyperlink)
 			GameTooltip:Show()
-			self.InnerHighlight:SetAlpha(1)
-		end
-	)
-
-	button:SetScript(
-		'OnLeave',
-		function(self)
+		elseif self.localizedName then
+			GameTooltip:SetText(self.localizedName)
+			GameTooltip:Show()
+		else
 			GameTooltip:Hide()
-			self.InnerHighlight:SetAlpha(0)
 		end
-	)
+		self.InnerHighlight:SetAlpha(1)
+	end)
 
-	button:SetScript(
-		'OnEnter',
-		function(self)
-			GameTooltip:SetOwner(self, 'ANCHOR_NONE')
-			GameTooltip:SetPoint('BOTTOMLEFT', self, 'TOPLEFT', 2, 4)
-			if (self.hyperlink) then
-				GameTooltip:SetHyperlink(self.hyperlink)
-				GameTooltip:Show()
-			elseif self.localizedName then
-				GameTooltip:SetText(self.localizedName)
-				GameTooltip:Show()
-			else
-				GameTooltip:Hide()
-			end
-			self.InnerHighlight:SetAlpha(1)
-		end
-	)
+	button:SetScript('OnLeave', function(self)
+		GameTooltip:Hide()
+		self.InnerHighlight:SetAlpha(0)
+	end)
 
-	button:SetScript(
-		'OnLeave',
-		function(self)
-			GameTooltip:Hide()
-			self.InnerHighlight:SetAlpha(0)
-		end
-	)
+	button:SetScript('OnClick', function(self)
+		-- Implement OnClick functionality
+	end)
 
-	button:SetScript(
-		'OnClick',
-		function(self)
-			-- Implement OnClick functionality
-		end
-	)
-
-	button:SetScript(
-		'OnMouseDown',
-		function(self)
-			-- Implement OnMouseDown functionality
-		end
-	)
+	button:SetScript('OnMouseDown', function(self)
+		-- Implement OnMouseDown functionality
+	end)
 
 	return button
 end
@@ -372,9 +347,9 @@ function CreateGearManager(frame)
 	local buttons = {} ---@type table<InventorySlotName, LibCS.GearFrame.Button>
 
 	local slotArrangement = {
-		[1] = {'HEADSLOT', 'NECKSLOT', 'SHOULDERSLOT', 'BACKSLOT', 'CHESTSLOT', 'SHIRTSLOT', 'TABARDSLOT', 'WRISTSLOT'},
-		[2] = {'HANDSSLOT', 'WAISTSLOT', 'LEGSSLOT', 'FEETSLOT', 'FINGER0SLOT', 'FINGER1SLOT', 'TRINKET0SLOT', 'TRINKET1SLOT'},
-		[3] = {'MAINHANDSLOT', 'SECONDARYHANDSLOT'}
+		[1] = { 'HEADSLOT', 'NECKSLOT', 'SHOULDERSLOT', 'BACKSLOT', 'CHESTSLOT', 'SHIRTSLOT', 'TABARDSLOT', 'WRISTSLOT' },
+		[2] = { 'HANDSSLOT', 'WAISTSLOT', 'LEGSSLOT', 'FEETSLOT', 'FINGER0SLOT', 'FINGER1SLOT', 'TRINKET0SLOT', 'TRINKET1SLOT' },
+		[3] = { 'MAINHANDSLOT', 'SECONDARYHANDSLOT' },
 	}
 
 	for _, group in ipairs(slotArrangement) do
@@ -384,14 +359,14 @@ function CreateGearManager(frame)
 	end
 
 	local size = 40
-	for i, child in ipairs({PaperDollItemsFrame:GetChildren()}) do
+	for i, child in ipairs({ PaperDollItemsFrame:GetChildren() }) do
 		local iconSize = size * 0.85 -- 85% of button size
 		local borderSize = size * 2.62 -- 262% of button size (maintains proportion)
 		local highlightSize = size * 1.31 -- 131% of button size
 		child.IconMask = child:CreateMaskTexture()
 		child.IconMask:SetTexture('Interface\\AddOns\\Libs-CharacterScreen\\media\\masks\\Circle', 'CLAMPTOBLACKADDITIVE', 'CLAMPTOBLACKADDITIVE')
 		child.IconMask:SetAllPoints(child.icon)
-		for i, textures in ipairs({child:GetRegions()}) do
+		for i, textures in ipairs({ child:GetRegions() }) do
 			if textures:GetObjectType() == 'Texture' then
 				textures:AddMaskTexture(child.IconMask)
 			end
@@ -452,7 +427,7 @@ local function CreatePortrait(frame)
 	portrait.Background:SetPoint('CENTER')
 	-- portrait.Background:SetSize(portrait:GetWidth() * 1.5, portrait:GetHeight() * 1.5) -- Make it larger than the portrait
 	portrait.Background:SetAtlas('gearUpdate-BG', true)
-	portrait.Background:SetScale(.75)
+	portrait.Background:SetScale(0.75)
 	portrait.Background:SetAlpha(0.7)
 
 	-- Mask
@@ -554,13 +529,13 @@ function LibCS:CreateNewCharacterFrame()
 	-- Top border decorations
 	frame.TopBorderDecoration = frame:CreateTexture(nil, 'OVERLAY')
 	frame.TopBorderDecoration:SetPoint('TOP', frame, 'TOP')
-	frame.TopBorderDecoration:SetScale(self.DB.background.border.scale + .1)
+	frame.TopBorderDecoration:SetScale(self.DB.background.border.scale + 0.1)
 	frame.TopBorderDecoration:SetAlpha(self.DB.background.border.alpha)
 
 	-- Bottom border decoration
 	frame.BottomBorderDecoration = frame:CreateTexture(nil, 'OVERLAY')
 	frame.BottomBorderDecoration:SetPoint('BOTTOM', frame, 'BOTTOM')
-	frame.BottomBorderDecoration:SetScale(self.DB.background.border.scale + .1)
+	frame.BottomBorderDecoration:SetScale(self.DB.background.border.scale + 0.1)
 	frame.BottomBorderDecoration:SetAlpha(self.DB.background.border.alpha)
 
 	-- Close button
@@ -630,7 +605,7 @@ function LibCS:SetupFrameArt(frame)
 	local mainTextureKitRegions = {
 		['Background'] = 'uiframethewarwithinbackground',
 		['TopGlow'] = 'UI-%s-Highlight-Top',
-		['BottomGlow'] = 'UI-%s-Highlight-Bottom'
+		['BottomGlow'] = 'UI-%s-Highlight-Bottom',
 	}
 
 	-- Setup the main textures
@@ -667,7 +642,7 @@ function LibCS:SetupFrameArt(frame)
 end
 
 function LibCS:OnInitialize()
-	self.database = LibStub('AceDB-3.0'):New('LibCSDB', {profile = DBDefaults})
+	self.database = LibStub('AceDB-3.0'):New('LibCSDB', { profile = DBDefaults })
 	self.DB = self.database.profile ---@type LibCS.DB
 
 	self:RegisterChatCommand('libcs', 'ChatCommand')
@@ -689,20 +664,14 @@ function LibCS:OnEnable()
 
 	CheckAddionalAddons()
 
-	CharacterFrame:HookScript(
-		'OnShow',
-		function()
-			LibCS.Frame:Show()
-			LibCS:RegisterEvent('UNIT_MODEL_CHANGED')
-		end
-	)
-	CharacterFrame:HookScript(
-		'OnHide',
-		function()
-			LibCS.Frame:Hide()
-			LibCS:UnregisterEvent('UNIT_MODEL_CHANGED')
-		end
-	)
+	CharacterFrame:HookScript('OnShow', function()
+		LibCS.Frame:Show()
+		LibCS:RegisterEvent('UNIT_MODEL_CHANGED')
+	end)
+	CharacterFrame:HookScript('OnHide', function()
+		LibCS.Frame:Hide()
+		LibCS:UnregisterEvent('UNIT_MODEL_CHANGED')
+	end)
 
 	-- self:RegisterEvent('PLAYER_ENTERING_WORLD')
 	-- self:RegisterEvent('CHARACTER_POINTS_CHANGED')
@@ -824,7 +793,7 @@ local SpecializationVisuals = {
 	-- Warrior
 	[0071] = 'warrior-arms',
 	[0072] = 'warrior-fury',
-	[0073] = 'warrior-protection'
+	[0073] = 'warrior-protection',
 }
 
 ---@param specID? number

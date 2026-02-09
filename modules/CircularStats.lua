@@ -11,23 +11,23 @@ local statCircles = {}
 
 ---@type table<string, table>
 local statConfig = {
-	['Strength'] = {color = {1, 0, 0}, priority = 1},
-	['Agility'] = {color = {0, 1, 0}, priority = 2},
-	['Intellect'] = {color = {0, 0, 1}, priority = 3},
-	['Stamina'] = {color = {1, 1, 0}, priority = 4},
-	['Critical Strike'] = {color = {1, 0.5, 0}, priority = 5},
-	['Haste'] = {color = {1, 0, 1}, priority = 6},
-	['Mastery'] = {color = {0, 1, 1}, priority = 7},
-	['Versatility'] = {color = {0.5, 1, 0.5}, priority = 8}
+	['Strength'] = { color = { 1, 0, 0 }, priority = 1 },
+	['Agility'] = { color = { 0, 1, 0 }, priority = 2 },
+	['Intellect'] = { color = { 0, 0, 1 }, priority = 3 },
+	['Stamina'] = { color = { 1, 1, 0 }, priority = 4 },
+	['Critical Strike'] = { color = { 1, 0.5, 0 }, priority = 5 },
+	['Haste'] = { color = { 1, 0, 1 }, priority = 6 },
+	['Mastery'] = { color = { 0, 1, 1 }, priority = 7 },
+	['Versatility'] = { color = { 0.5, 1, 0.5 }, priority = 8 },
 }
 
 ---@type table<number, table>
 local progressColors = {
-	[0] = {0.5, 0.5, 0.5}, -- Gray (0-10%)
-	[10] = {0, 1, 0}, -- Green (10-20%)
-	[20] = {0, 0.5, 1}, -- Blue (20-30%)
-	[30] = {0.7, 0, 1}, -- Purple (30-40%)
-	[40] = {1, 0.5, 0} -- Orange (40%+)
+	[0] = { 0.5, 0.5, 0.5 }, -- Gray (0-10%)
+	[10] = { 0, 1, 0 }, -- Green (10-20%)
+	[20] = { 0, 0.5, 1 }, -- Blue (20-30%)
+	[30] = { 0.7, 0, 1 }, -- Purple (30-40%)
+	[40] = { 1, 0.5, 0 }, -- Orange (40%+)
 }
 
 function CircularStats:OnInitialize()

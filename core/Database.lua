@@ -7,7 +7,7 @@ LibCS.Database = Database
 
 -- Flexible defaults system - only stores minimal structure for AceDB
 local DBDefaults = {
-	global = {}
+	global = {},
 }
 
 function Database:OnInitialize()
@@ -102,7 +102,12 @@ end
 ---@return boolean
 function Database:IsModuleEnabled(moduleName)
 	-- Default to true for essential modules, false for optional ones
-	local defaultEnabled = moduleName == 'Portrait' or moduleName == 'Equipment' or moduleName == 'AddonIntegration'
+	local defaultEnabled = moduleName == 'Portrait'
+		or moduleName == 'Equipment'
+		or moduleName == 'AddonIntegration'
+		or moduleName == 'Stats'
+		or moduleName == 'MythicPlus'
+		or moduleName == 'RaidProgress'
 	return self:GetModuleSetting(moduleName, 'enabled', defaultEnabled)
 end
 

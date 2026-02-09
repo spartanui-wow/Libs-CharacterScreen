@@ -1,12 +1,14 @@
-## Interface: 110200
-## Title: Libs - Character Screen
-## Notes: Enchanced Character Screen
+## Interface: 120001, 120000
+## Title: Lib's - Character Screen
+## Notes: Enhanced Character Screen
 ## IconTexture: Interface/Addons/Libs-CharacterScreen/Logo-Icon
 ## Version: @project-version@
 ## Author: wutname1
 ## X-Curse-Project-ID: xxxxxxxx
 ## X-Wago-ID: xxxxxxxxx
-## X-Github: https://github.com/Wutname1/Libs-CharacterScreen
+## X-Github: https://github.com/spartanui-wow/Libs-CharacterScreen
+## SavedVariables: LibCSDB
+## OptionalDeps: Libs-AddonTools
 
 Libs/Ace3/Ace3.xml
 Libs/LibSharedMedia-3.0/lib.xml
@@ -16,11 +18,20 @@ Libs/LibBase64-1.0/lib.xml
 LibCS.lua
 core/Framework.lua
 core/Database.lua
-core/FrameManager.lua
 core/Core.lua
+
+data/RaidData.lua
+
+modules/Settings.lua
 modules/Portrait.lua
 modules/Equipment.lua
 modules/AddonIntegration.lua
+modules/Stats.lua
 modules/CircularStats.lua
+modules/MythicPlus.lua
+modules/RaidProgress.lua
 modules/Notifications.lua
 modules/LootSpec.lua
+modules/Reputation.lua
+
+core/FrameManager.lua

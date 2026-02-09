@@ -72,7 +72,9 @@ This is a WoW addon project with no traditional build system. Development is don
 
 ## Reference Files
 
-The current World of Warcraft interface files can be found in `C:\Users\jerem\Syncthing\WOWUICode\wow-ui-source\Interface`. This directory contains the official game UI source code and should be used for reference only - **do not edit files in this directory**. Use these files to understand Blizzard's UI patterns, frame structures, and API usage.
+The World of Warcraft interface files can be found in `C:\code\WOWUICode`. This repository contains branches for each game version (Retail, Classic, TBC, Wrath, Cata, Mists, etc.) with the official Blizzard UI source code. Use `git checkout <branch>` to switch between versions.
+
+**Important**: This is a reference repository only - **do not edit files in this directory**. Use these files to understand Blizzard's UI patterns, frame structures, and API usage.
 
 ## Testing
 

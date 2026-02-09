@@ -8,16 +8,20 @@ local loadedModules = {}
 ---@type string[]
 local moduleOrder = {
 	'Database',
+	'Settings',
 	'FrameManager',
 	'Portrait',
 	'Equipment',
 	'AddonIntegration',
+	'Stats',
 	'CircularStats',
+	'MythicPlus',
+	'RaidProgress',
 	'Notifications',
 	'LootSpec',
 	'Reputation',
 	'EnhancedEquipment',
-	'ModelControls'
+	'ModelControls',
 }
 
 function Core:OnInitialize()
@@ -34,7 +38,7 @@ function Core:OnDisable()
 end
 
 function Core:LoadCoreModules()
-	local coreModules = {'Database', 'FrameManager'}
+	local coreModules = { 'Database', 'Settings', 'FrameManager' }
 
 	for _, moduleName in ipairs(coreModules) do
 		local success, module = self:LoadModule(moduleName, true)
@@ -49,12 +53,15 @@ function Core:LoadOptionalModules()
 		'Portrait',
 		'Equipment',
 		'AddonIntegration',
+		'Stats',
 		'CircularStats',
+		'MythicPlus',
+		'RaidProgress',
 		'Notifications',
 		'LootSpec',
 		'Reputation',
 		'EnhancedEquipment',
-		'ModelControls'
+		'ModelControls',
 	}
 
 	for _, moduleName in ipairs(optionalModules) do
@@ -76,24 +83,21 @@ function Core:LoadModule(moduleName, isCore)
 		return true, loadedModules[moduleName]
 	end
 
-	local success, err =
-		pcall(
-		function()
-			local module
-			if moduleName == 'Database' or moduleName == 'FrameManager' then
-				module = LibCS:GetModule(moduleName, true)
-			else
-				module = LibCS:GetModule(moduleName, true)
-			end
-
-			if module and module.OnInitialize then
-				module:OnInitialize()
-			end
-
-			loadedModules[moduleName] = module
-			return module
+	local success, err = pcall(function()
+		local module
+		if moduleName == 'Database' or moduleName == 'FrameManager' then
+			module = LibCS:GetModule(moduleName, true)
+		else
+			module = LibCS:GetModule(moduleName, true)
 		end
-	)
+
+		if module and module.OnInitialize then
+			module:OnInitialize()
+		end
+
+		loadedModules[moduleName] = module
+		return module
+	end)
 
 	if not success then
 		if isCore then

@@ -1,51 +1,61 @@
 ---@diagnostic disable
 function PaperDollFrame_OnEvent(self, event, ...)
 	local unit = ...
-	if (event == 'PLAYER_ENTERING_WORLD' or event == 'GX_RESTARTED') then
+	if event == 'PLAYER_ENTERING_WORLD' or event == 'GX_RESTARTED' then
 		return
-	elseif (event == 'UNIT_MODEL_CHANGED' and unit == 'player') then
+	elseif event == 'UNIT_MODEL_CHANGED' and unit == 'player' then
 		PaperDollFrame_SetPlayer()
 		return
-	elseif (event == 'KNOWN_TITLES_UPDATE' or (event == 'UNIT_NAME_UPDATE' and unit == 'player')) then
-		if (PaperDollFrame.TitleManagerPane:IsShown()) then
+	elseif event == 'KNOWN_TITLES_UPDATE' or (event == 'UNIT_NAME_UPDATE' and unit == 'player') then
+		if PaperDollFrame.TitleManagerPane:IsShown() then
 			PaperDollTitlesPane_Update()
 		end
 	end
 
-	if (not self:IsVisible()) then
+	if not self:IsVisible() then
 		return
 	end
 
-	if (unit == 'player') then
-		if (event == 'UNIT_LEVEL') then
+	if unit == 'player' then
+		if event == 'UNIT_LEVEL' then
 			PaperDollFrame_SetLevel()
 		elseif
-			(event == 'UNIT_DAMAGE' or event == 'UNIT_ATTACK_SPEED' or event == 'UNIT_RANGEDDAMAGE' or event == 'UNIT_ATTACK' or event == 'UNIT_STATS' or event == 'UNIT_RANGED_ATTACK_POWER' or
-				event == 'UNIT_SPELL_HASTE' or
-				event == 'UNIT_MAXHEALTH' or
-				event == 'UNIT_AURA' or
-				event == 'UNIT_RESISTANCES')
-		 then
+			event == 'UNIT_DAMAGE'
+			or event == 'UNIT_ATTACK_SPEED'
+			or event == 'UNIT_RANGEDDAMAGE'
+			or event == 'UNIT_ATTACK'
+			or event == 'UNIT_STATS'
+			or event == 'UNIT_RANGED_ATTACK_POWER'
+			or event == 'UNIT_SPELL_HASTE'
+			or event == 'UNIT_MAXHEALTH'
+			or event == 'UNIT_AURA'
+			or event == 'UNIT_RESISTANCES'
+		then
 			self:SetScript('OnUpdate', PaperDollFrame_QueuedUpdate)
 		end
 	end
 
 	if
-		(event == 'COMBAT_RATING_UPDATE' or event == 'MASTERY_UPDATE' or event == 'SPEED_UPDATE' or event == 'LIFESTEAL_UPDATE' or event == 'AVOIDANCE_UPDATE' or event == 'BAG_UPDATE' or
-			event == 'PLAYER_EQUIPMENT_CHANGED' or
-			event == 'PLAYER_AVG_ITEM_LEVEL_UPDATE' or
-			event == 'PLAYER_DAMAGE_DONE_MODS' or
-			event == 'PLAYER_TARGET_CHANGED')
-	 then
+		event == 'COMBAT_RATING_UPDATE'
+		or event == 'MASTERY_UPDATE'
+		or event == 'SPEED_UPDATE'
+		or event == 'LIFESTEAL_UPDATE'
+		or event == 'AVOIDANCE_UPDATE'
+		or event == 'BAG_UPDATE'
+		or event == 'PLAYER_EQUIPMENT_CHANGED'
+		or event == 'PLAYER_AVG_ITEM_LEVEL_UPDATE'
+		or event == 'PLAYER_DAMAGE_DONE_MODS'
+		or event == 'PLAYER_TARGET_CHANGED'
+	then
 		self:SetScript('OnUpdate', PaperDollFrame_QueuedUpdate)
-	elseif (event == 'PLAYER_TALENT_UPDATE') then
+	elseif event == 'PLAYER_TALENT_UPDATE' then
 		PaperDollFrame_SetLevel()
 		self:SetScript('OnUpdate', PaperDollFrame_QueuedUpdate)
-	elseif (event == 'ACTIVE_TALENT_GROUP_CHANGED') then
+	elseif event == 'ACTIVE_TALENT_GROUP_CHANGED' then
 		PaperDollFrame_UpdateStats()
-	elseif (event == 'SPELL_POWER_CHANGED') then
+	elseif event == 'SPELL_POWER_CHANGED' then
 		self:SetScript('OnUpdate', PaperDollFrame_QueuedUpdate)
-	elseif (event == 'TRIAL_STATUS_UPDATE') then
+	elseif event == 'TRIAL_STATUS_UPDATE' then
 		PaperDollFrame_SetLevel()
 	end
 end
@@ -64,9 +74,9 @@ function PrepWindow()
 		['showrenown'] = true,
 		['textoutline'] = '',
 		['sheetscale'] = 1,
-		['ccsbgcolor'] = {0.1, 0.1, 0.1, 1},
+		['ccsbgcolor'] = { 0.1, 0.1, 0.1, 1 },
 		['hpad'] = 0,
-		['vpad'] = 0
+		['vpad'] = 0,
 	}
 
 	local c = config
@@ -104,23 +114,23 @@ function PrepWindow()
 	local GEM_DOMINATION = 22
 
 	local GemInfo = {
-		[136256] = {text = EMPTY_SOCKET_BLUE, gtype = GEM_PRISMATIC},
-		[407324] = {text = EMPTY_SOCKET_COGWHEEL, gtype = GEM_COGWHEEL},
-		[4624650] = {text = EMPTY_SOCKET_TINKER, gtype = GEM_COGWHEEL},
-		[4624651] = {text = EMPTY_SOCKET_TINKER, gtype = GEM_COGWHEEL},
-		[4624652] = {text = EMPTY_SOCKET_TINKER, gtype = GEM_COGWHEEL},
-		[4624653] = {text = EMPTY_SOCKET_TINKER, gtype = GEM_COGWHEEL},
-		[4624654] = {text = EMPTY_SOCKET_TINKER, gtype = GEM_COGWHEEL},
-		[4624655] = {text = EMPTY_SOCKET_TINKER, gtype = GEM_COGWHEEL},
-		[4095404] = {text = EMPTY_SOCKET_DOMINATION, gtype = GEM_DOMINATION},
-		[407325] = {text = EMPTY_SOCKET_HYDRAULIC, gtype = GEM_HYDRAULIC},
-		[136257] = {text = EMPTY_SOCKET_META, gtype = GEM_META},
-		[458977] = {text = EMPTY_SOCKET_PRISMATIC, gtype = GEM_PRISMATIC},
-		[2958629] = {text = EMPTY_SOCKET_PUNCHCARDBLUE, gtype = GEM_PUNCHCARDBLUE},
-		[2958630] = {text = EMPTY_SOCKET_TINKER, gtype = GEM_PUNCHCARDRED},
-		[2958631] = {text = EMPTY_SOCKET_PUNCHCARDYELLOW, gtype = GEM_PUNCHCARDYELLOW},
-		[136258] = {text = EMPTY_SOCKET_RED, gtype = GEM_PRISMATIC},
-		[136259] = {text = EMPTY_SOCKET_YELLOW, gtype = GEM_PRISMATIC}
+		[136256] = { text = EMPTY_SOCKET_BLUE, gtype = GEM_PRISMATIC },
+		[407324] = { text = EMPTY_SOCKET_COGWHEEL, gtype = GEM_COGWHEEL },
+		[4624650] = { text = EMPTY_SOCKET_TINKER, gtype = GEM_COGWHEEL },
+		[4624651] = { text = EMPTY_SOCKET_TINKER, gtype = GEM_COGWHEEL },
+		[4624652] = { text = EMPTY_SOCKET_TINKER, gtype = GEM_COGWHEEL },
+		[4624653] = { text = EMPTY_SOCKET_TINKER, gtype = GEM_COGWHEEL },
+		[4624654] = { text = EMPTY_SOCKET_TINKER, gtype = GEM_COGWHEEL },
+		[4624655] = { text = EMPTY_SOCKET_TINKER, gtype = GEM_COGWHEEL },
+		[4095404] = { text = EMPTY_SOCKET_DOMINATION, gtype = GEM_DOMINATION },
+		[407325] = { text = EMPTY_SOCKET_HYDRAULIC, gtype = GEM_HYDRAULIC },
+		[136257] = { text = EMPTY_SOCKET_META, gtype = GEM_META },
+		[458977] = { text = EMPTY_SOCKET_PRISMATIC, gtype = GEM_PRISMATIC },
+		[2958629] = { text = EMPTY_SOCKET_PUNCHCARDBLUE, gtype = GEM_PUNCHCARDBLUE },
+		[2958630] = { text = EMPTY_SOCKET_TINKER, gtype = GEM_PUNCHCARDRED },
+		[2958631] = { text = EMPTY_SOCKET_PUNCHCARDYELLOW, gtype = GEM_PUNCHCARDYELLOW },
+		[136258] = { text = EMPTY_SOCKET_RED, gtype = GEM_PRISMATIC },
+		[136259] = { text = EMPTY_SOCKET_YELLOW, gtype = GEM_PRISMATIC },
 	}
 
 	-- local hookfix = function()
@@ -447,7 +457,7 @@ function PrepWindow()
 	module.initializecharacterframe()
 
 	module.ReputationFrame_Update = function()
-		local ks = {ReputationFrame.ScrollBox.ScrollTarget:GetChildren()}
+		local ks = { ReputationFrame.ScrollBox.ScrollTarget:GetChildren() }
 		local gender = UnitSex('player')
 		local xtext, factiontext = '', ''
 
@@ -456,7 +466,7 @@ function PrepWindow()
 		end
 
 		for _, k in ipairs(ks) do
-			local ks2 = {k:GetChildren()}
+			local ks2 = { k:GetChildren() }
 			for _, k2 in ipairs(ks2) do -- Individual Row
 				local name, description, standingID, barMin, barMax, barValue, atWarWith, canToggleAtWar, isHeader, isCollapsed, hasRep, isWatched, isChild, factionID, hasBonusRepGain, canSetInactive =
 					GetFactionInfo(k.index)
@@ -482,7 +492,8 @@ function PrepWindow()
 				if name == 'Inactive' or name == 'Other' then
 					-- we skip the inactive header since the friendship lookup doesn't like it.
 				else
-					local friendID, friendRep, friendMaxRep, friendName, friendText, friendTexture, friendTextLevel, friendThreshold, nextFriendThreshold = C_GossipInfo.GetFriendshipReputation(factionID)
+					local friendID, friendRep, friendMaxRep, friendName, friendText, friendTexture, friendTextLevel, friendThreshold, nextFriendThreshold =
+						C_GossipInfo.GetFriendshipReputation(factionID)
 					local colorIndex = standingID
 					local barColor = FACTION_BAR_COLORS[colorIndex]
 					local factionStandingtext
@@ -547,8 +558,13 @@ function PrepWindow()
 					-- end of paragon changes
 					local fontName, fontHeight, fontFlags = k2.ReputationBar.FactionStanding:GetFont()
 
-					xtext =
-						format('  %s%-17.17s %15.15s%s', HIGHLIGHT_FONT_COLOR_CODE, factiontext, format(REPUTATION_PROGRESS_FORMAT, BreakUpLargeNumbers(barValue), BreakUpLargeNumbers(barMax)), FONT_COLOR_CODE_CLOSE)
+					xtext = format(
+						'  %s%-17.17s %15.15s%s',
+						HIGHLIGHT_FONT_COLOR_CODE,
+						factiontext,
+						format(REPUTATION_PROGRESS_FORMAT, BreakUpLargeNumbers(barValue), BreakUpLargeNumbers(barMax)),
+						FONT_COLOR_CODE_CLOSE
+					)
 
 					k.rolloverText = xtext
 					k.standingText = xtext
@@ -884,12 +900,9 @@ function PrepWindow()
 		btn3pf.Glow:Show()
 		btn3pf.Icon:Show()
 		btn3pf.Check:Show()
-		btn3pf:SetScript(
-			'OnUpdate',
-			function(self)
-				ReputationParagonFrame_OnUpdate(self)
-			end
-		)
+		btn3pf:SetScript('OnUpdate', function(self)
+			ReputationParagonFrame_OnUpdate(self)
+		end)
 
 		local btn3fs1 = _G['ccs_sf_btn3_fs1'] or btn3:CreateFontString('ccs_sf_btn3_fs1')
 		btn3fs1:SetPoint('TOP', btn3bg, 'TOP', 27, -5)
@@ -925,24 +938,15 @@ function PrepWindow()
 		btn3fs2:SetFont(Font, c.fontsize_renown or 11, 'OUTLINE')
 		btn3fs2:Show()
 
-		btn3:SetScript(
-			'OnClick',
-			function()
-				sf_bafc(3)
-			end
-		)
-		btn3:SetScript(
-			'OnEnter',
-			function()
-				btn3fs1:SetTextColor(1, 1, 0, 1)
-			end
-		)
-		btn3:SetScript(
-			'OnLeave',
-			function()
-				btn3fs1:SetTextColor(1, 1, 1, 1)
-			end
-		)
+		btn3:SetScript('OnClick', function()
+			sf_bafc(3)
+		end)
+		btn3:SetScript('OnEnter', function()
+			btn3fs1:SetTextColor(1, 1, 0, 1)
+		end)
+		btn3:SetScript('OnLeave', function()
+			btn3fs1:SetTextColor(1, 1, 1, 1)
+		end)
 
 		local btn4 = _G['ccs_sf_btn4'] or CreateFrame('Button', 'ccs_sf_btn4', _G['ccs_sf']) --, "SecureActionButtonTemplate");
 		if c.showbtn4 then
@@ -988,12 +992,9 @@ function PrepWindow()
 		btn4pf.Glow:Show()
 		btn4pf.Icon:Show()
 		btn4pf.Check:Show()
-		btn4pf:SetScript(
-			'OnUpdate',
-			function(self)
-				ReputationParagonFrame_OnUpdate(self)
-			end
-		)
+		btn4pf:SetScript('OnUpdate', function(self)
+			ReputationParagonFrame_OnUpdate(self)
+		end)
 
 		local btn4fs1 = _G['ccs_sf_btn4_fs1'] or btn4:CreateFontString('ccs_sf_btn4_fs1')
 		btn4fs1:SetPoint('TOP', btn4bg, 'TOP', 27, -5)
@@ -1029,24 +1030,15 @@ function PrepWindow()
 		btn4fs2:SetFont(Font, c.fontsize_renown or 11, 'OUTLINE')
 		btn4fs2:Show()
 
-		btn4:SetScript(
-			'OnClick',
-			function()
-				sf_bafc(4)
-			end
-		)
-		btn4:SetScript(
-			'OnEnter',
-			function()
-				btn4fs1:SetTextColor(1, 1, 0, 1)
-			end
-		)
-		btn4:SetScript(
-			'OnLeave',
-			function()
-				btn4fs1:SetTextColor(1, 1, 1, 1)
-			end
-		)
+		btn4:SetScript('OnClick', function()
+			sf_bafc(4)
+		end)
+		btn4:SetScript('OnEnter', function()
+			btn4fs1:SetTextColor(1, 1, 0, 1)
+		end)
+		btn4:SetScript('OnLeave', function()
+			btn4fs1:SetTextColor(1, 1, 1, 1)
+		end)
 
 		local btn5 = _G['ccs_sf_btn5'] or CreateFrame('Button', 'ccs_sf_btn5', _G['ccs_sf']) --, "SecureActionButtonTemplate");
 		if c.showbtn5 then
@@ -1092,12 +1084,9 @@ function PrepWindow()
 		btn5pf.Glow:Show()
 		btn5pf.Icon:Show()
 		btn5pf.Check:Show()
-		btn5pf:SetScript(
-			'OnUpdate',
-			function(self)
-				ReputationParagonFrame_OnUpdate(self)
-			end
-		)
+		btn5pf:SetScript('OnUpdate', function(self)
+			ReputationParagonFrame_OnUpdate(self)
+		end)
 
 		local btn5fs1 = _G['ccs_sf_btn5_fs1'] or btn5:CreateFontString('ccs_sf_btn5_fs1')
 		btn5fs1:SetPoint('TOP', btn5bg, 'TOP', 27, -5)
@@ -1133,24 +1122,15 @@ function PrepWindow()
 		btn5fs2:SetFont(Font, c.fontsize_renown or 11, 'OUTLINE')
 		btn5fs2:Show()
 
-		btn5:SetScript(
-			'OnClick',
-			function()
-				sf_bafc(5)
-			end
-		)
-		btn5:SetScript(
-			'OnEnter',
-			function()
-				btn5fs1:SetTextColor(1, 1, 0, 1)
-			end
-		)
-		btn5:SetScript(
-			'OnLeave',
-			function()
-				btn5fs1:SetTextColor(1, 1, 1, 1)
-			end
-		)
+		btn5:SetScript('OnClick', function()
+			sf_bafc(5)
+		end)
+		btn5:SetScript('OnEnter', function()
+			btn5fs1:SetTextColor(1, 1, 0, 1)
+		end)
+		btn5:SetScript('OnLeave', function()
+			btn5fs1:SetTextColor(1, 1, 1, 1)
+		end)
 
 		local btn6 = _G['ccs_sf_btn6'] or CreateFrame('Button', 'ccs_sf_btn6', _G['ccs_sf']) --, "SecureActionButtonTemplate");
 		if c.showbtn6 then
@@ -1196,12 +1176,9 @@ function PrepWindow()
 		btn6pf.Glow:Show()
 		btn6pf.Icon:Show()
 		btn6pf.Check:Show()
-		btn6pf:SetScript(
-			'OnUpdate',
-			function(self)
-				ReputationParagonFrame_OnUpdate(self)
-			end
-		)
+		btn6pf:SetScript('OnUpdate', function(self)
+			ReputationParagonFrame_OnUpdate(self)
+		end)
 
 		local btn6fs1 = _G['ccs_sf_btn6_fs1'] or btn6:CreateFontString('ccs_sf_btn6_fs1')
 		btn6fs1:SetPoint('TOP', btn6bg, 'TOP', 22, -5)
@@ -1237,24 +1214,15 @@ function PrepWindow()
 		btn6fs2:SetFont(Font, c.fontsize_renown or 11, 'OUTLINE')
 		btn6fs2:Show()
 
-		btn6:SetScript(
-			'OnClick',
-			function()
-				sf_bafc(6)
-			end
-		)
-		btn6:SetScript(
-			'OnEnter',
-			function()
-				btn6fs1:SetTextColor(1, 1, 0, 1)
-			end
-		)
-		btn6:SetScript(
-			'OnLeave',
-			function()
-				btn6fs1:SetTextColor(1, 1, 1, 1)
-			end
-		)
+		btn6:SetScript('OnClick', function()
+			sf_bafc(6)
+		end)
+		btn6:SetScript('OnEnter', function()
+			btn6fs1:SetTextColor(1, 1, 0, 1)
+		end)
+		btn6:SetScript('OnLeave', function()
+			btn6fs1:SetTextColor(1, 1, 1, 1)
+		end)
 
 		local btn7 = _G['ccs_sf_btn7'] or CreateFrame('Button', 'ccs_sf_btn7', _G['ccs_sf']) --, "SecureActionButtonTemplate");
 		if c.showbtn7 then
@@ -1300,12 +1268,9 @@ function PrepWindow()
 		btn7pf.Glow:Show()
 		btn7pf.Icon:Show()
 		btn7pf.Check:Show()
-		btn7pf:SetScript(
-			'OnUpdate',
-			function(self)
-				ReputationParagonFrame_OnUpdate(self)
-			end
-		)
+		btn7pf:SetScript('OnUpdate', function(self)
+			ReputationParagonFrame_OnUpdate(self)
+		end)
 
 		local btn7fs1 = _G['ccs_sf_btn7_fs1'] or btn7:CreateFontString('ccs_sf_btn7_fs1')
 		btn7fs1:SetPoint('TOP', btn7bg, 'TOP', 22, -5)
@@ -1341,24 +1306,15 @@ function PrepWindow()
 		btn7fs2:SetFont(Font, c.fontsize_renown or 11, 'OUTLINE')
 		btn7fs2:Show()
 
-		btn7:SetScript(
-			'OnClick',
-			function()
-				sf_bafc(7)
-			end
-		)
-		btn7:SetScript(
-			'OnEnter',
-			function()
-				btn7fs1:SetTextColor(1, 1, 0, 1)
-			end
-		)
-		btn7:SetScript(
-			'OnLeave',
-			function()
-				btn7fs1:SetTextColor(1, 1, 1, 1)
-			end
-		)
+		btn7:SetScript('OnClick', function()
+			sf_bafc(7)
+		end)
+		btn7:SetScript('OnEnter', function()
+			btn7fs1:SetTextColor(1, 1, 0, 1)
+		end)
+		btn7:SetScript('OnLeave', function()
+			btn7fs1:SetTextColor(1, 1, 1, 1)
+		end)
 
 		local btn8 = _G['ccs_sf_btn8'] or CreateFrame('Button', 'ccs_sf_btn8', _G['ccs_sf']) --, "SecureActionButtonTemplate");
 		if c.showbtn8 then
@@ -1404,12 +1360,9 @@ function PrepWindow()
 		btn8pf.Glow:Show()
 		btn8pf.Icon:Show()
 		btn8pf.Check:Show()
-		btn8pf:SetScript(
-			'OnUpdate',
-			function(self)
-				ReputationParagonFrame_OnUpdate(self)
-			end
-		)
+		btn8pf:SetScript('OnUpdate', function(self)
+			ReputationParagonFrame_OnUpdate(self)
+		end)
 
 		local btn8fs1 = _G['ccs_sf_btn8_fs1'] or btn8:CreateFontString('ccs_sf_btn8_fs1')
 		btn8fs1:SetPoint('TOP', btn8bg, 'TOP', 22, -5)
@@ -1445,24 +1398,15 @@ function PrepWindow()
 		btn8fs2:SetFont(Font, c.fontsize_renown or 11, 'OUTLINE')
 		btn8fs2:Show()
 
-		btn8:SetScript(
-			'OnClick',
-			function()
-				sf_bafc(8)
-			end
-		)
-		btn8:SetScript(
-			'OnEnter',
-			function()
-				btn8fs1:SetTextColor(1, 1, 0, 1)
-			end
-		)
-		btn8:SetScript(
-			'OnLeave',
-			function()
-				btn8fs1:SetTextColor(1, 1, 1, 1)
-			end
-		)
+		btn8:SetScript('OnClick', function()
+			sf_bafc(8)
+		end)
+		btn8:SetScript('OnEnter', function()
+			btn8fs1:SetTextColor(1, 1, 0, 1)
+		end)
+		btn8:SetScript('OnLeave', function()
+			btn8fs1:SetTextColor(1, 1, 1, 1)
+		end)
 
 		btn3:SetSize(250, 54)
 		btn3:SetPoint('RIGHT', btn4, 'LEFT', -3, 0)
@@ -1489,115 +1433,95 @@ function PrepWindow()
 		sf_bg:Show()
 
 		--== Frame Hooks
-		hooksecurefunc(
-			TokenFrame,
-			'Show',
-			function()
-				-- hookfix()
-			end
-		)
-		hooksecurefunc(
-			TokenFrame.ScrollBox,
-			'Update',
-			function()
-				local tf = {TokenFrame.ScrollBox.ScrollTarget:GetChildren()}
+		hooksecurefunc(TokenFrame, 'Show', function()
+			-- hookfix()
+		end)
+		hooksecurefunc(TokenFrame.ScrollBox, 'Update', function()
+			local tf = { TokenFrame.ScrollBox.ScrollTarget:GetChildren() }
 
-				for _, t in ipairs(tf) do
-					if t and t.Name then
-						t.Name:SetFont(t.Name:GetFont(), c.fontsize_currency or 11, '')
-					end
-					if t and t.Count then
-						t.Count:SetFont(t.Count:GetFont(), c.fontsize_currency or 11, '')
-					end
+			for _, t in ipairs(tf) do
+				if t and t.Name then
+					t.Name:SetFont(t.Name:GetFont(), c.fontsize_currency or 11, '')
+				end
+				if t and t.Count then
+					t.Count:SetFont(t.Count:GetFont(), c.fontsize_currency or 11, '')
 				end
 			end
-		)
+		end)
 
-		hooksecurefunc(
-			PaperDollFrame,
-			'Show',
-			function()
-				-- hookfix()
+		hooksecurefunc(PaperDollFrame, 'Show', function()
+			-- hookfix()
+		end)
+
+		hooksecurefunc(CharacterFrame, 'Show', function()
+			-- Move blizzard frames around and resize upon CharacterFrame being opened.
+			module.InitializeFrameUpdates()
+			module.loopitems()
+			MajorFactionRenownFrame:SetParent(_G['ccs_sf'])
+			WeeklyRewardsFrame:ClearAllPoints()
+			WeeklyRewardsFrame:SetParent(CharacterFrame)
+			WeeklyRewardsFrame:SetPoint('TOP', CCSf, 'TOP', 0, -20)
+			WeeklyRewardsFrame:SetScale(0.85)
+			WeeklyRewardsFrame.BackgroundTile:SetAlpha(0.6)
+			WeeklyRewardsFrame.CloseButton:Hide()
+			WeeklyRewardsFrame:SetFrameStrata('HIGH')
+			WeeklyRewardsFrame:Hide()
+
+			sf:ClearAllPoints()
+			sf:SetPoint('TOPLEFT', CCSf, 'TOPLEFT', 0, 0)
+			sf:SetPoint('TOPRIGHT', CCSf, 'TOPRIGHT', 0, 0)
+			sf:SetPoint('BOTTOM', CCSf, 'BOTTOM', 0, -45)
+
+			sf_bg:ClearAllPoints()
+			sf_bg:SetAllPoints()
+			sf_bg:SetTexture('Interface\\AddOns\\WeakAuras\\Media\\Textures\\Square_FullWhite.tga')
+			sf_bg:SetColorTexture(0.1, 0.1, 0.1, 0.6)
+
+			sf_topbar:ClearAllPoints()
+			sf_topbar:SetPoint('TOPLEFT', sf, 'TOPLEFT')
+			sf_topbar:SetPoint('TOPRIGHT', sf, 'TOPRIGHT')
+			sf_topbar:SetHeight(16)
+			sf_topbar:SetTexture('1723833')
+			sf_topbar:SetTexCoord(0, 1, 0.586, 0.734)
+
+			sf_topstreaks:ClearAllPoints()
+			sf_topstreaks:SetPoint('TOPLEFT', sf_topbar, 'BOTTOMLEFT')
+			sf_topstreaks:SetPoint('TOPRIGHT', sf_topbar, 'BOTTOMRIGHT')
+			sf_topstreaks:SetHeight(43)
+			sf_topstreaks:SetTexture('1723833')
+			sf_topstreaks:SetTexCoord(0, 1, 0, 0.328)
+			sf_bottombar:ClearAllPoints()
+			sf_bottombar:SetPoint('BOTTOMLEFT', sf, 'BOTTOMLEFT')
+			sf_bottombar:SetPoint('BOTTOMRIGHT', sf, 'BOTTOMRIGHT')
+			sf_bottombar:SetHeight(67)
+			sf_bottombar:SetTexture('4556093')
+			sf_bottombar:SetTexCoord(0, 0.75, 0, 0.082)
+			GameTooltip:Hide()
+		end)
+
+		hooksecurefunc(CharacterFrame, 'Hide', function()
+			-- Move blizzard frames back so they can be opened normally.
+			WeeklyRewardsFrame:ClearAllPoints()
+			WeeklyRewardsFrame:SetPoint('CENTER', UIParent, 'CENTER', 0, 0)
+			WeeklyRewardsFrame:SetParent(UIParent)
+			WeeklyRewardsFrame:SetScale(1)
+			WeeklyRewardsFrame.BackgroundTile:SetAlpha(1)
+			WeeklyRewardsFrame.CloseButton:Show()
+			WeeklyRewardsFrame:Hide()
+			MajorFactionRenownFrame:Hide()
+			MajorFactionRenownFrame:SetParent(UIParent)
+			MajorFactionRenownFrame.Background:SetAlpha(1)
+			MajorFactionRenownFrame.CloseButton:Show()
+			if true then
+				_G['ccs_sf_btn3_bg']:SetAlpha(0.3)
+				_G['ccs_sf_btn4_bg']:SetAlpha(0.3)
+				_G['ccs_sf_btn5_bg']:SetAlpha(0.3)
+				_G['ccs_sf_btn6_bg']:SetAlpha(0.3)
+				_G['ccs_sf_btn7_bg']:SetAlpha(0.3)
+				_G['ccs_sf_btn8_bg']:SetAlpha(0.3)
 			end
-		)
-
-		hooksecurefunc(
-			CharacterFrame,
-			'Show',
-			function()
-				-- Move blizzard frames around and resize upon CharacterFrame being opened.
-				module.InitializeFrameUpdates()
-				module.loopitems()
-				MajorFactionRenownFrame:SetParent(_G['ccs_sf'])
-				WeeklyRewardsFrame:ClearAllPoints()
-				WeeklyRewardsFrame:SetParent(CharacterFrame)
-				WeeklyRewardsFrame:SetPoint('TOP', CCSf, 'TOP', 0, -20)
-				WeeklyRewardsFrame:SetScale(0.85)
-				WeeklyRewardsFrame.BackgroundTile:SetAlpha(0.6)
-				WeeklyRewardsFrame.CloseButton:Hide()
-				WeeklyRewardsFrame:SetFrameStrata('HIGH')
-				WeeklyRewardsFrame:Hide()
-
-				sf:ClearAllPoints()
-				sf:SetPoint('TOPLEFT', CCSf, 'TOPLEFT', 0, 0)
-				sf:SetPoint('TOPRIGHT', CCSf, 'TOPRIGHT', 0, 0)
-				sf:SetPoint('BOTTOM', CCSf, 'BOTTOM', 0, -45)
-
-				sf_bg:ClearAllPoints()
-				sf_bg:SetAllPoints()
-				sf_bg:SetTexture('Interface\\AddOns\\WeakAuras\\Media\\Textures\\Square_FullWhite.tga')
-				sf_bg:SetColorTexture(0.1, 0.1, 0.1, 0.6)
-
-				sf_topbar:ClearAllPoints()
-				sf_topbar:SetPoint('TOPLEFT', sf, 'TOPLEFT')
-				sf_topbar:SetPoint('TOPRIGHT', sf, 'TOPRIGHT')
-				sf_topbar:SetHeight(16)
-				sf_topbar:SetTexture('1723833')
-				sf_topbar:SetTexCoord(0, 1, 0.586, 0.734)
-
-				sf_topstreaks:ClearAllPoints()
-				sf_topstreaks:SetPoint('TOPLEFT', sf_topbar, 'BOTTOMLEFT')
-				sf_topstreaks:SetPoint('TOPRIGHT', sf_topbar, 'BOTTOMRIGHT')
-				sf_topstreaks:SetHeight(43)
-				sf_topstreaks:SetTexture('1723833')
-				sf_topstreaks:SetTexCoord(0, 1, 0, 0.328)
-				sf_bottombar:ClearAllPoints()
-				sf_bottombar:SetPoint('BOTTOMLEFT', sf, 'BOTTOMLEFT')
-				sf_bottombar:SetPoint('BOTTOMRIGHT', sf, 'BOTTOMRIGHT')
-				sf_bottombar:SetHeight(67)
-				sf_bottombar:SetTexture('4556093')
-				sf_bottombar:SetTexCoord(0, 0.75, 0, 0.082)
-				GameTooltip:Hide()
-			end
-		)
-
-		hooksecurefunc(
-			CharacterFrame,
-			'Hide',
-			function()
-				-- Move blizzard frames back so they can be opened normally.
-				WeeklyRewardsFrame:ClearAllPoints()
-				WeeklyRewardsFrame:SetPoint('CENTER', UIParent, 'CENTER', 0, 0)
-				WeeklyRewardsFrame:SetParent(UIParent)
-				WeeklyRewardsFrame:SetScale(1)
-				WeeklyRewardsFrame.BackgroundTile:SetAlpha(1)
-				WeeklyRewardsFrame.CloseButton:Show()
-				WeeklyRewardsFrame:Hide()
-				MajorFactionRenownFrame:Hide()
-				MajorFactionRenownFrame:SetParent(UIParent)
-				MajorFactionRenownFrame.Background:SetAlpha(1)
-				MajorFactionRenownFrame.CloseButton:Show()
-				if true then
-					_G['ccs_sf_btn3_bg']:SetAlpha(0.3)
-					_G['ccs_sf_btn4_bg']:SetAlpha(0.3)
-					_G['ccs_sf_btn5_bg']:SetAlpha(0.3)
-					_G['ccs_sf_btn6_bg']:SetAlpha(0.3)
-					_G['ccs_sf_btn7_bg']:SetAlpha(0.3)
-					_G['ccs_sf_btn8_bg']:SetAlpha(0.3)
-				end
-				GameTooltip:Hide()
-			end
-		)
+			GameTooltip:Hide()
+		end)
 	end
 
 	-- [Paragon Toast] Show the Paragon Toast if a Paragon Reward Quest is accepted.
@@ -1612,30 +1536,18 @@ function PrepWindow()
 			toast.title:SetAlpha(0)
 			toast.description:SetText(text)
 			toast.description:SetAlpha(0)
-			C_Timer.After(
-				1,
-				function()
-					UIFrameFadeIn(toast, 0.5, 0, 1)
-				end
-			)
-			C_Timer.After(
-				2,
-				function()
-					UIFrameFadeIn(toast.title, 0.5, 0, 1)
-				end
-			)
-			C_Timer.After(
-				2,
-				function()
-					UIFrameFadeIn(toast.description, 0.5, 0, 1)
-				end
-			)
-			C_Timer.After(
-				5,
-				function()
-					UIFrameFadeOut(toast, 1, 1, 0)
-				end
-			)
+			C_Timer.After(1, function()
+				UIFrameFadeIn(toast, 0.5, 0, 1)
+			end)
+			C_Timer.After(2, function()
+				UIFrameFadeIn(toast.title, 0.5, 0, 1)
+			end)
+			C_Timer.After(2, function()
+				UIFrameFadeIn(toast.description, 0.5, 0, 1)
+			end)
+			C_Timer.After(5, function()
+				UIFrameFadeOut(toast, 1, 1, 0)
+			end)
 		end
 	end
 
@@ -1847,7 +1759,7 @@ function PrepWindow()
 			local durCur, durMax = GetInventoryItemDurability(slotIndex) -- Get item durability
 			local _, _, Color, _, _, _, Gem1, Gem2, Gem3, _, _, _, _, _, _ =
 				string.find(link, '|?c?f?f?(%x*)|?H?([^:]*):?(%d+):?(%d*):?(%d*):?(%d*):?(%d*):?(%d*):?(%-?%d*):?(%-?%d*):?(%d*):?(%d*)|?h?%[?([^%[%]]*)%]?|?h?|?r?')
-			local itemName, _, itemRarity, itemiLevel, _, itemType, _, _, _, _, _, _, _, _, expacID, setID, _ = GetItemInfo(link)
+			local itemName, _, itemRarity, itemiLevel, _, itemType, _, _, _, _, _, _, _, _, expacID, setID, _ = C_Item.GetItemInfo(link)
 			local Gemtex1, Gemtex2, Gemtex3 = nil, nil, nil
 			local ItemTip = _G['CCS_Scanningtooltip'] or CreateFrame('GameTooltip', 'CCS_Scanningtooltip', WorldFrame, 'GameTooltipTemplate')
 
@@ -2055,71 +1967,45 @@ function PrepWindow()
 					gemIconframe3:Show()
 				end
 
-				gemIconframe1:SetScript(
-					'OnEnter',
-					function()
-						GameTooltip:SetOwner(UIParent, 'ANCHOR_CURSOR')
-						if gem1Link then
-							GameTooltip:SetHyperlink(gem1Link)
-						else
-							GameTooltip:AddDoubleLine(tooltip, '', 1, 1, 1, 1, 1, 1)
-						end
-						GameTooltip:Show()
+				gemIconframe1:SetScript('OnEnter', function()
+					GameTooltip:SetOwner(UIParent, 'ANCHOR_CURSOR')
+					if gem1Link then
+						GameTooltip:SetHyperlink(gem1Link)
+					else
+						GameTooltip:AddDoubleLine(tooltip, '', 1, 1, 1, 1, 1, 1)
 					end
-				)
-				gemIconframe1:SetScript(
-					'OnLeave',
-					function()
-						GameTooltip:Hide()
+					GameTooltip:Show()
+				end)
+				gemIconframe1:SetScript('OnLeave', function()
+					GameTooltip:Hide()
+				end)
+				gemIconframe2:SetScript('OnEnter', function()
+					GameTooltip:SetOwner(UIParent, 'ANCHOR_CURSOR')
+					if gem2Link then
+						GameTooltip:SetHyperlink(gem2Link)
+					else
+						GameTooltip:AddDoubleLine(tooltip2, '', 1, 1, 1, 1, 1, 1)
 					end
-				)
-				gemIconframe2:SetScript(
-					'OnEnter',
-					function()
-						GameTooltip:SetOwner(UIParent, 'ANCHOR_CURSOR')
-						if gem2Link then
-							GameTooltip:SetHyperlink(gem2Link)
-						else
-							GameTooltip:AddDoubleLine(tooltip2, '', 1, 1, 1, 1, 1, 1)
-						end
-						GameTooltip:Show()
-					end
-				)
-				gemIconframe2:SetScript(
-					'OnLeave',
-					function()
-						GameTooltip:Hide()
-					end
-				)
-				gemIconframe2:SetScript(
-					'OnClick',
-					function()
-					end
-				)
+					GameTooltip:Show()
+				end)
+				gemIconframe2:SetScript('OnLeave', function()
+					GameTooltip:Hide()
+				end)
+				gemIconframe2:SetScript('OnClick', function() end)
 
-				gemIconframe3:SetScript(
-					'OnEnter',
-					function()
-						GameTooltip:SetOwner(UIParent, 'ANCHOR_CURSOR')
-						if gem3Link then
-							GameTooltip:SetHyperlink(gem3Link)
-						else
-							GameTooltip:AddDoubleLine(tooltip3, '', 1, 1, 1, 1, 1, 1)
-						end
-						GameTooltip:Show()
+				gemIconframe3:SetScript('OnEnter', function()
+					GameTooltip:SetOwner(UIParent, 'ANCHOR_CURSOR')
+					if gem3Link then
+						GameTooltip:SetHyperlink(gem3Link)
+					else
+						GameTooltip:AddDoubleLine(tooltip3, '', 1, 1, 1, 1, 1, 1)
 					end
-				)
-				gemIconframe3:SetScript(
-					'OnLeave',
-					function()
-						GameTooltip:Hide()
-					end
-				)
-				gemIconframe3:SetScript(
-					'OnClick',
-					function()
-					end
-				)
+					GameTooltip:Show()
+				end)
+				gemIconframe3:SetScript('OnLeave', function()
+					GameTooltip:Hide()
+				end)
+				gemIconframe3:SetScript('OnClick', function() end)
 			end
 		end
 	end
@@ -2223,38 +2109,29 @@ function PrepWindow()
 						btntex:SetColorTexture(0, 0, 0, 0.65)
 					end
 
-					btn:SetScript(
-						'OnEnter',
-						function()
-							GameTooltip:SetOwner(UIParent, 'ANCHOR_CURSOR')
-							if link then
-								GameTooltip:SetHyperlink(link)
-							else
-								GameTooltip:AddDoubleLine(name, spellid, 1, 1, 1, 1, 1, 1)
-								GameTooltip:AddLine(description, nil, nil, nil, true)
-							end
-							GameTooltip:Show()
+					btn:SetScript('OnEnter', function()
+						GameTooltip:SetOwner(UIParent, 'ANCHOR_CURSOR')
+						if link then
+							GameTooltip:SetHyperlink(link)
+						else
+							GameTooltip:AddDoubleLine(name, spellid, 1, 1, 1, 1, 1, 1)
+							GameTooltip:AddLine(description, nil, nil, nil, true)
 						end
-					)
-					btn:SetScript(
-						'OnLeave',
-						function()
-							GameTooltip:Hide()
-						end
-					)
+						GameTooltip:Show()
+					end)
+					btn:SetScript('OnLeave', function()
+						GameTooltip:Hide()
+					end)
 
-					btn:SetScript(
-						'OnClick',
-						function()
-							-- Add specific functionality when clicking the button
-							if count == 0 and specIndex ~= 0 then
-								SetLootSpecialization(0)
-							elseif id ~= specIndex then
-								SetLootSpecialization(id)
-							end
-							PlaySound(SOUNDKIT.GS_LOGIN_CHANGE_REALM_OK) -- just puts a sound in when clicking on the button for more feedback
+					btn:SetScript('OnClick', function()
+						-- Add specific functionality when clicking the button
+						if count == 0 and specIndex ~= 0 then
+							SetLootSpecialization(0)
+						elseif id ~= specIndex then
+							SetLootSpecialization(id)
 						end
-					)
+						PlaySound(SOUNDKIT.GS_LOGIN_CHANGE_REALM_OK) -- just puts a sound in when clicking on the button for more feedback
+					end)
 				end
 				-- end clickable button frame
 			end
@@ -2410,13 +2287,9 @@ function PrepWindow()
 					WeeklyRewardsFrame:SetScale(0.77)
 					WeeklyRewardsFrame.Overlay:Hide()
 					WeeklyRewardsFrame.Overlay:SetFrameStrata('BACKGROUND')
-					C_Timer.NewTicker(
-						0.3,
-						function()
-							WeeklyRewardsFrame.Overlay:Hide()
-						end,
-						1
-					)
+					C_Timer.NewTicker(0.3, function()
+						WeeklyRewardsFrame.Overlay:Hide()
+					end, 1)
 					WeeklyRewardsFrame.Blackout:Hide()
 				end
 				ccs_sf_bg:Show()
@@ -2426,45 +2299,27 @@ function PrepWindow()
 		PlaySound(SOUNDKIT.GS_LOGIN_CHANGE_REALM_OK) -- just puts a sound in when clicking on the button for more feedback
 	end
 
-	btn:SetScript(
-		'OnEnter',
-		function()
-			GameTooltip:SetOwner(UIParent, 'ANCHOR_CURSOR')
-			GameTooltip:AddDoubleLine('', nil, 1, 1, 1, 1, 1, 1)
-			GameTooltip:Show()
-		end
-	)
-	btn:SetScript(
-		'OnLeave',
-		function()
-			GameTooltip:Hide()
-		end
-	)
-	btn:SetScript(
-		'OnClick',
-		function()
-			module.Clicky(1)
-		end
-	)
+	btn:SetScript('OnEnter', function()
+		GameTooltip:SetOwner(UIParent, 'ANCHOR_CURSOR')
+		GameTooltip:AddDoubleLine('', nil, 1, 1, 1, 1, 1, 1)
+		GameTooltip:Show()
+	end)
+	btn:SetScript('OnLeave', function()
+		GameTooltip:Hide()
+	end)
+	btn:SetScript('OnClick', function()
+		module.Clicky(1)
+	end)
 
-	btn2:SetScript(
-		'OnEnter',
-		function()
-			GameTooltip:SetOwner(UIParent, 'ANCHOR_CURSOR')
-			GameTooltip:AddDoubleLine('', nil, 1, 1, 1, 1, 1, 1)
-			GameTooltip:Show()
-		end
-	)
-	btn2:SetScript(
-		'OnLeave',
-		function()
-			GameTooltip:Hide()
-		end
-	)
-	btn2:SetScript(
-		'OnClick',
-		function()
-			module.Clicky(2)
-		end
-	)
+	btn2:SetScript('OnEnter', function()
+		GameTooltip:SetOwner(UIParent, 'ANCHOR_CURSOR')
+		GameTooltip:AddDoubleLine('', nil, 1, 1, 1, 1, 1, 1)
+		GameTooltip:Show()
+	end)
+	btn2:SetScript('OnLeave', function()
+		GameTooltip:Hide()
+	end)
+	btn2:SetScript('OnClick', function()
+		module.Clicky(2)
+	end)
 end

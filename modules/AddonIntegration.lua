@@ -50,7 +50,7 @@ function AddonIntegration:ScanForAddons()
 		return
 	end
 
-	for _, addonName in ipairs(self:GetSetting('supportedAddons', {'Pawn', 'Narcissus', 'Simulationcraft'})) do
+	for _, addonName in ipairs(self:GetSetting('supportedAddons', { 'Pawn', 'Narcissus', 'Simulationcraft' })) do
 		if C_AddOns.IsAddOnLoaded(addonName) and not integratedAddons[addonName] then
 			self:IntegrateAddon(addonName)
 		end
@@ -87,14 +87,11 @@ function AddonIntegration:IntegratePawn()
 
 	local newButton = self:CreateAddonButton('LibCS_PawnButton', 'Pawn')
 	if newButton then
-		newButton:SetScript(
-			'OnClick',
-			function()
-				if PawnUI_InventoryPawnButton and PawnUI_InventoryPawnButton:GetScript('OnClick') then
-					PawnUI_InventoryPawnButton:GetScript('OnClick')(PawnUI_InventoryPawnButton)
-				end
+		newButton:SetScript('OnClick', function()
+			if PawnUI_InventoryPawnButton and PawnUI_InventoryPawnButton:GetScript('OnClick') then
+				PawnUI_InventoryPawnButton:GetScript('OnClick')(PawnUI_InventoryPawnButton)
 			end
-		)
+		end)
 
 		local icon = C_AddOns.GetAddOnMetadata('Pawn', 'IconTexture')
 		if icon then
@@ -129,15 +126,12 @@ function AddonIntegration:IntegrateSimulationcraft()
 		simcButton:SetText('SimC')
 		simcButton:SetSize(50, 22)
 
-		simcButton:SetScript(
-			'OnClick',
-			function()
-				local Simulationcraft = LibStub('AceAddon-3.0'):GetAddon('Simulationcraft', true)
-				if Simulationcraft and Simulationcraft.PrintSimcProfile then
-					Simulationcraft:PrintSimcProfile(false, false, false)
-				end
+		simcButton:SetScript('OnClick', function()
+			local Simulationcraft = LibStub('AceAddon-3.0'):GetAddon('Simulationcraft', true)
+			if Simulationcraft and Simulationcraft.PrintSimcProfile then
+				Simulationcraft:PrintSimcProfile(false, false, false)
 			end
-		)
+		end)
 
 		local icon = 'Interface\\AddOns\\SimulationCraft\\logo'
 		if C_Texture.GetAtlasInfo('SimC') then
@@ -191,7 +185,7 @@ function AddonIntegration:GetNextButtonPosition()
 			relativeTo = tab3,
 			relativePoint = 'TOPRIGHT',
 			x = 0,
-			y = 0
+			y = 0,
 		}
 	else
 		local lastButton = self:GetLastButton()
@@ -200,7 +194,7 @@ function AddonIntegration:GetNextButtonPosition()
 			relativeTo = lastButton,
 			relativePoint = 'TOPRIGHT',
 			x = 0,
-			y = 0
+			y = 0,
 		}
 	end
 end
@@ -233,29 +227,19 @@ end
 ---@param button Button
 ---@param anchor table
 function AddonIntegration:PreventButtonMovement(button, anchor)
-	button:HookScript(
-		'OnShow',
-		function()
-			button:ClearAllPoints()
-			button:SetPoint(anchor.point, anchor.relativeTo, anchor.relativePoint, anchor.x, anchor.y)
-		end
-	)
+	button:HookScript('OnShow', function()
+		button:ClearAllPoints()
+		button:SetPoint(anchor.point, anchor.relativeTo, anchor.relativePoint, anchor.x, anchor.y)
+	end)
 
-	hooksecurefunc(
-		button,
-		'SetPoint',
-		function(self, point, relativeTo)
-			if relativeTo ~= anchor.relativeTo then
-				C_Timer.After(
-					0,
-					function()
-						self:ClearAllPoints()
-						self:SetPoint(anchor.point, anchor.relativeTo, anchor.relativePoint, anchor.x, anchor.y)
-					end
-				)
-			end
+	hooksecurefunc(button, 'SetPoint', function(self, point, relativeTo)
+		if relativeTo ~= anchor.relativeTo then
+			C_Timer.After(0, function()
+				self:ClearAllPoints()
+				self:SetPoint(anchor.point, anchor.relativeTo, anchor.relativePoint, anchor.x, anchor.y)
+			end)
 		end
-	)
+	end)
 end
 
 function AddonIntegration:RemoveAllIntegrations()
@@ -308,12 +292,9 @@ function AddonIntegration:ADDON_LOADED(event, addonName)
 end
 
 function AddonIntegration:PLAYER_LOGIN()
-	C_Timer.After(
-		2,
-		function()
-			self:ScanForAddons()
-		end
-	)
+	C_Timer.After(2, function()
+		self:ScanForAddons()
+	end)
 end
 
 ---@param addonName string
