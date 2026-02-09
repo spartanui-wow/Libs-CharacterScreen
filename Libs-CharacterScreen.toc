@@ -4,8 +4,6 @@
 ## IconTexture: Interface/Addons/Libs-CharacterScreen/Logo-Icon
 ## Version: @project-version@
 ## Author: wutname1
-## X-Curse-Project-ID: xxxxxxxx
-## X-Wago-ID: xxxxxxxxx
 ## X-Github: https://github.com/spartanui-wow/Libs-CharacterScreen
 ## SavedVariables: LibCSDB
 ## OptionalDeps: Libs-AddonTools
