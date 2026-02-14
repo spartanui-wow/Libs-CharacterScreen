@@ -6,7 +6,7 @@
 ## Author: wutname1
 ## X-Github: https://github.com/spartanui-wow/Libs-CharacterScreen
 ## SavedVariables: LibCSDB
-## OptionalDeps: Libs-AddonTools
+## OptionalDeps: LibsAddonTools
 
 Libs/Ace3/Ace3.xml
 Libs/LibSharedMedia-3.0/lib.xml
