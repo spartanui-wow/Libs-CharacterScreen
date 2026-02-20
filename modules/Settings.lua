@@ -10,7 +10,6 @@ local AceConfig = LibCS.Lib.AceConfig
 local AceConfigDialog = LibCS.Lib.AceConfigDialog
 local AceDBOptions = LibStub('AceDBOptions-3.0', true)
 local LibCompress = LibStub('LibCompress', true)
-local LibBase64 = LibStub('LibBase64-1.0', true)
 
 -- Module definitions for the settings UI
 local moduleDefinitions = {
@@ -320,7 +319,7 @@ end
 ---Export the current profile to a compressed string
 ---@return string
 function Settings:ExportProfile()
-	if not LibCompress or not LibBase64 then
+	if not LibCompress then
 		return 'Export libraries not available'
 	end
 

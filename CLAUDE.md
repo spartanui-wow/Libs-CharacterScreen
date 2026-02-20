@@ -68,7 +68,6 @@ This is a WoW addon project with no traditional build system. Development is don
 - **Ace3**: Core addon framework (included in libs/ directory)
 - **LibSharedMedia-3.0**: Media resource management
 - **LibCompress**: Data compression utilities
-- **LibBase64-1.0**: Base64 encoding/decoding
 
 ## Reference Files
 
