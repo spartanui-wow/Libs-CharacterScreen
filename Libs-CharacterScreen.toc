@@ -1,4 +1,4 @@
-## Interface: 120007
+## Interface: 120100, 120007
 ## Title: Lib's - Character Screen
 ## Notes: Enhanced Character Screen
 ## IconTexture: Interface/Addons/Libs-CharacterScreen/Logo-Icon
